@@ -13,9 +13,8 @@ import {
   Coins,
   ArrowLeft,
   Lock,
-  Clock,
-  Sparkles,
-  Info,
+  Ticket,
+  AlertCircle,
 } from "lucide-react";
 import { SHAMA_EVENTS } from "@/lib/data";
 import { PAYMENT_CONFIG } from "@/lib/payment-config";
@@ -23,10 +22,12 @@ import { savePurchase } from "@/lib/store";
 import { createQRPayload, generateTicketSignature } from "@/lib/crypto";
 import { DEFAULT_BCV_RATE, formatBs, formatUsd, usdToBs } from "@/lib/bcv";
 import { PaymentMethod, TicketPurchase } from "@/lib/types";
+import { useAuth } from "@/components/AuthContext";
 
 function CheckoutContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { user } = useAuth();
 
   const eventSlug = searchParams.get("event") || SHAMA_EVENTS[0].slug;
   const tierId = searchParams.get("tier");
@@ -39,18 +40,26 @@ function CheckoutContent() {
   const totalUsd = tier.priceUsd * quantity;
   const totalBs = usdToBs(totalUsd, bcvRate);
 
-  // Form states
-  const [fullName, setFullName] = useState("");
-  const [idCard, setIdCard] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
+  // Form states (Pre-fill if logged in)
+  const [fullName, setFullName] = useState(user?.fullName || "");
+  const [idCard, setIdCard] = useState(user?.idCard || "");
+  const [email, setEmail] = useState(user?.email || "");
+  const [phone, setPhone] = useState(user?.phone || "");
   const [company, setCompany] = useState("");
+
+  useEffect(() => {
+    if (user) {
+      if (!fullName) setFullName(user.fullName);
+      if (!idCard) setIdCard(user.idCard);
+      if (!email) setEmail(user.email);
+      if (!phone) setPhone(user.phone);
+    }
+  }, [user]);
 
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("pago_movil");
   const [selectedBank, setSelectedBank] = useState("mercantil");
   const [paymentReference, setPaymentReference] = useState("");
   const [originBank, setOriginBank] = useState("Mercantil");
-  const [senderPhone, setSenderPhone] = useState("");
   const [cryptoTxId, setCryptoTxId] = useState("");
   const [cryptoSubtype, setCryptoSubtype] = useState<"binance" | "usdt">("binance");
 
@@ -74,7 +83,7 @@ function CheckoutContent() {
     }
 
     if (!paymentReference.trim() && !cryptoTxId.trim()) {
-      setErrorMsg("Por favor introduce el número de referencia o ID de la transacción del pago realizado.");
+      setErrorMsg("Por favor introduce el número de referencia o ID de transacción del pago.");
       return;
     }
 
@@ -106,12 +115,13 @@ function CheckoutContent() {
         email: email.trim(),
         phone: phone.trim(),
         company: company.trim() || undefined,
+        userId: user?.id,
       },
       paymentMethod,
       paymentDetails: {
         reference: paymentReference.trim() || cryptoTxId.trim(),
         originBank: paymentMethod === "pago_movil" || paymentMethod === "transferencia" ? originBank : undefined,
-        senderPhone: paymentMethod === "pago_movil" ? senderPhone : undefined,
+        senderPhone: paymentMethod === "pago_movil" ? phone.trim() : undefined,
         cryptoTxId: paymentMethod === "binance_pay" || paymentMethod === "usdt" ? (cryptoTxId.trim() || paymentReference.trim()) : undefined,
         createdAt: new Date().toISOString(),
       },
@@ -124,13 +134,12 @@ function CheckoutContent() {
 
     savePurchase(newPurchase);
 
-    // Launch celebratory confetti
     try {
       confetti({
-        particleCount: 120,
+        particleCount: 100,
         spread: 70,
         origin: { y: 0.6 },
-        colors: ["#f59e0b", "#10b981", "#8b5cf6", "#fbbf24"],
+        colors: ["#2563eb", "#10b981", "#d97706"],
       });
     } catch {
       // ignore
@@ -146,37 +155,37 @@ function CheckoutContent() {
   return (
     <div style={{ padding: "30px 0 80px" }}>
       <div className="container">
-        {/* Header navigation */}
-        <div style={{ marginBottom: "24px" }}>
+        {/* Navigation */}
+        <div style={{ marginBottom: "20px" }}>
           <Link
             href={`/eventos/${event.slug}`}
-            style={{ display: "inline-flex", alignItems: "center", gap: "8px", color: "var(--text-secondary)", fontSize: "0.9rem" }}
+            style={{ display: "inline-flex", alignItems: "center", gap: "6px", color: "var(--text-secondary)", fontSize: "0.88rem" }}
           >
             <ArrowLeft size={16} /> Volver a {event.title}
           </Link>
         </div>
 
-        <div style={{ marginBottom: "32px" }}>
-          <span className="badge badge-gold" style={{ marginBottom: "8px" }}>
-            <Lock size={12} /> Proceso de Pago Seguro
+        <div style={{ marginBottom: "28px" }}>
+          <span className="badge badge-online" style={{ marginBottom: "6px" }}>
+            <Lock size={12} /> Checkout Seguro
           </span>
-          <h1 style={{ fontSize: "2.4rem", fontWeight: 800 }}>Finalizar Compra de Boletos</h1>
-          <p style={{ color: "var(--text-secondary)", fontSize: "1rem" }}>
-            Completa tus datos de asistente y realiza el pago mediante los canales autorizados en Venezuela.
+          <h1 style={{ fontSize: "2rem", fontWeight: 800, color: "var(--text-primary)" }}>Finalizar Compra de Boletos</h1>
+          <p style={{ color: "var(--text-secondary)", fontSize: "0.92rem" }}>
+            Completa los datos del titular y selecciona tu método de pago autorizado en Venezuela.
           </p>
         </div>
 
         <form onSubmit={handleSubmitOrder}>
-          <div className="checkout-grid">
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 380px", gap: "32px", alignItems: "start" }}>
             {/* Left Column: Form & Payment Methods */}
             <div>
               {/* Step 1: Attendee Info */}
-              <div className="glass-panel" style={{ padding: "32px", marginBottom: "32px" }}>
+              <div className="clean-event-card" style={{ padding: "28px", marginBottom: "24px" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "20px" }}>
-                  <div style={{ width: "28px", height: "28px", borderRadius: "50%", background: "var(--accent-gold)", color: "#080a10", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: "0.9rem" }}>
+                  <div style={{ width: "26px", height: "26px", borderRadius: "50%", background: "var(--primary-blue)", color: "#ffffff", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: "0.85rem" }}>
                     1
                   </div>
-                  <h2 style={{ fontSize: "1.25rem", fontWeight: 700 }}>Datos del Asistente (Titular del Boleto)</h2>
+                  <h2 style={{ fontSize: "1.15rem", fontWeight: 800, color: "var(--text-primary)" }}>Datos del Asistente (Titular de la Entrada)</h2>
                 </div>
 
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
@@ -194,7 +203,7 @@ function CheckoutContent() {
                   </div>
 
                   <div className="form-group">
-                    <label className="form-label">Cédula de Identidad o Pasaporte *</label>
+                    <label className="form-label">Cédula de Identidad *</label>
                     <input
                       type="text"
                       className="form-input"
@@ -219,8 +228,8 @@ function CheckoutContent() {
                     />
                   </div>
 
-                  <div className="form-group">
-                    <label className="form-label">Correo Electrónico *</label>
+                  <div className="form-group" style={{ gridColumn: "span 2" }}>
+                    <label className="form-label">Correo Electrónico (para envío de QR) *</label>
                     <input
                       type="email"
                       className="form-input"
@@ -231,155 +240,143 @@ function CheckoutContent() {
                       id="attendee-email"
                     />
                   </div>
-
-                  <div className="form-group">
-                    <label className="form-label">Empresa / Rol (Opcional)</label>
-                    <input
-                      type="text"
-                      className="form-input"
-                      placeholder="Ej: Productor Independiente"
-                      value={company}
-                      onChange={(e) => setCompany(e.target.value)}
-                      id="attendee-company"
-                    />
-                  </div>
                 </div>
               </div>
 
-              {/* Step 2: Payment Method Selection */}
-              <div className="glass-panel" style={{ padding: "32px", marginBottom: "32px" }}>
+              {/* Step 2: Payment Method */}
+              <div className="clean-event-card" style={{ padding: "28px" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "20px" }}>
-                  <div style={{ width: "28px", height: "28px", borderRadius: "50%", background: "var(--accent-gold)", color: "#080a10", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: "0.9rem" }}>
+                  <div style={{ width: "26px", height: "26px", borderRadius: "50%", background: "var(--primary-blue)", color: "#ffffff", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: "0.85rem" }}>
                     2
                   </div>
-                  <h2 style={{ fontSize: "1.25rem", fontWeight: 700 }}>Método de Pago</h2>
+                  <h2 style={{ fontSize: "1.15rem", fontWeight: 800, color: "var(--text-primary)" }}>Método de Pago en Venezuela</h2>
                 </div>
 
                 {/* Tabs */}
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "12px", marginBottom: "24px" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "10px", marginBottom: "20px" }}>
                   <div
-                    className={`payment-tab ${paymentMethod === "pago_movil" ? "active" : ""}`}
                     onClick={() => setPaymentMethod("pago_movil")}
+                    style={{
+                      padding: "12px",
+                      borderRadius: "8px",
+                      border: paymentMethod === "pago_movil" ? "2px solid var(--primary-blue)" : "1px solid var(--border-subtle)",
+                      background: paymentMethod === "pago_movil" ? "var(--primary-blue-light)" : "#ffffff",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "10px",
+                    }}
                     id="tab-pago-movil"
                   >
-                    <Smartphone size={22} color="var(--accent-gold)" />
+                    <Smartphone size={20} color="var(--primary-blue)" />
                     <div>
-                      <div style={{ fontWeight: 700, fontSize: "0.95rem" }}>Pago Móvil</div>
-                      <div style={{ fontSize: "0.75rem", color: "var(--text-secondary)" }}>Instantáneo en Bs.</div>
+                      <div style={{ fontWeight: 700, fontSize: "0.9rem" }}>Pago Móvil</div>
+                      <div style={{ fontSize: "0.72rem", color: "var(--text-muted)" }}>En Bolívares</div>
                     </div>
                   </div>
 
                   <div
-                    className={`payment-tab ${paymentMethod === "transferencia" ? "active" : ""}`}
                     onClick={() => setPaymentMethod("transferencia")}
+                    style={{
+                      padding: "12px",
+                      borderRadius: "8px",
+                      border: paymentMethod === "transferencia" ? "2px solid var(--primary-blue)" : "1px solid var(--border-subtle)",
+                      background: paymentMethod === "transferencia" ? "var(--primary-blue-light)" : "#ffffff",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "10px",
+                    }}
                     id="tab-transferencia"
                   >
-                    <Building2 size={22} color="var(--accent-gold)" />
+                    <Building2 size={20} color="var(--primary-blue)" />
                     <div>
-                      <div style={{ fontWeight: 700, fontSize: "0.95rem" }}>Transferencia</div>
-                      <div style={{ fontSize: "0.75rem", color: "var(--text-secondary)" }}>Cuentas Nacionales</div>
+                      <div style={{ fontWeight: 700, fontSize: "0.9rem" }}>Transferencia</div>
+                      <div style={{ fontSize: "0.72rem", color: "var(--text-muted)" }}>Cuentas Nacionales</div>
                     </div>
                   </div>
 
                   <div
-                    className={`payment-tab ${paymentMethod === "binance_pay" ? "active" : ""}`}
                     onClick={() => setPaymentMethod("binance_pay")}
+                    style={{
+                      padding: "12px",
+                      borderRadius: "8px",
+                      border: paymentMethod === "binance_pay" ? "2px solid var(--primary-blue)" : "1px solid var(--border-subtle)",
+                      background: paymentMethod === "binance_pay" ? "var(--primary-blue-light)" : "#ffffff",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "10px",
+                    }}
                     id="tab-crypto"
                   >
-                    <Coins size={22} color="var(--accent-gold)" />
+                    <Coins size={20} color="var(--primary-blue)" />
                     <div>
-                      <div style={{ fontWeight: 700, fontSize: "0.95rem" }}>Cripto (USDT)</div>
-                      <div style={{ fontSize: "0.75rem", color: "var(--text-secondary)" }}>Binance / Redes</div>
+                      <div style={{ fontWeight: 700, fontSize: "0.9rem" }}>Cripto (USDT)</div>
+                      <div style={{ fontSize: "0.72rem", color: "var(--text-muted)" }}>Binance Pay</div>
                     </div>
                   </div>
                 </div>
 
-                {/* ============= DETAILS ACCORDING TO PAYMENT METHOD ============= */}
+                {/* PAGO MOVIL CONTENT */}
                 {paymentMethod === "pago_movil" && (
-                  <div style={{ background: "var(--bg-elevated)", padding: "24px", borderRadius: "var(--radius-sm)", marginBottom: "24px" }}>
-                    <h3 style={{ fontSize: "1rem", fontWeight: 700, marginBottom: "12px", color: "var(--accent-gold)" }}>
-                      Datos para realizar tu Pago Móvil:
+                  <div style={{ background: "var(--bg-primary)", padding: "20px", borderRadius: "8px", border: "1px solid var(--border-subtle)", marginBottom: "20px" }}>
+                    <h3 style={{ fontSize: "0.95rem", fontWeight: 700, color: "var(--text-primary)", marginBottom: "10px" }}>
+                      Datos para emitir Pago Móvil:
                     </h3>
-                    <p style={{ fontSize: "0.85rem", color: "var(--text-secondary)", marginBottom: "16px" }}>
-                      Abre tu aplicación bancaria y emite el Pago Móvil a cualquiera de nuestros bancos autorizados con el monto exacto:
-                    </p>
 
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "20px" }}>
-                      <div>
-                        <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>Teléfono Destino:</span>
-                        <div className="copy-field">
-                          <strong style={{ fontSize: "0.92rem" }}>{PAYMENT_CONFIG.pagoMovil.phone}</strong>
-                          <button
-                            type="button"
-                            onClick={() => handleCopy(PAYMENT_CONFIG.pagoMovil.phone, "pm-phone")}
-                            className="btn btn-secondary btn-sm"
-                            style={{ padding: "4px 8px" }}
-                          >
-                            {copiedField === "pm-phone" ? <Check size={14} color="var(--status-success)" /> : <Copy size={14} />}
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "16px" }}>
+                      <div style={{ background: "#ffffff", padding: "10px 12px", borderRadius: "6px", border: "1px solid var(--border-subtle)" }}>
+                        <span style={{ fontSize: "0.72rem", color: "var(--text-muted)", display: "block" }}>Teléfono Destino:</span>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                          <strong style={{ fontSize: "0.95rem" }}>{PAYMENT_CONFIG.pagoMovil.phone}</strong>
+                          <button type="button" onClick={() => handleCopy(PAYMENT_CONFIG.pagoMovil.phone, "pm-phone")}>
+                            {copiedField === "pm-phone" ? <Check size={14} color="#16a34a" /> : <Copy size={14} color="#64748b" />}
                           </button>
                         </div>
                       </div>
 
-                      <div>
-                        <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>Cédula del Titular:</span>
-                        <div className="copy-field">
-                          <strong style={{ fontSize: "0.92rem" }}>{PAYMENT_CONFIG.pagoMovil.idCard}</strong>
-                          <button
-                            type="button"
-                            onClick={() => handleCopy(PAYMENT_CONFIG.pagoMovil.idCard, "pm-id")}
-                            className="btn btn-secondary btn-sm"
-                            style={{ padding: "4px 8px" }}
-                          >
-                            {copiedField === "pm-id" ? <Check size={14} color="var(--status-success)" /> : <Copy size={14} />}
+                      <div style={{ background: "#ffffff", padding: "10px 12px", borderRadius: "6px", border: "1px solid var(--border-subtle)" }}>
+                        <span style={{ fontSize: "0.72rem", color: "var(--text-muted)", display: "block" }}>Cédula del Titular:</span>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                          <strong style={{ fontSize: "0.95rem" }}>{PAYMENT_CONFIG.pagoMovil.idCard}</strong>
+                          <button type="button" onClick={() => handleCopy(PAYMENT_CONFIG.pagoMovil.idCard, "pm-id")}>
+                            {copiedField === "pm-id" ? <Check size={14} color="#16a34a" /> : <Copy size={14} color="#64748b" />}
                           </button>
                         </div>
                       </div>
 
-                      <div>
-                        <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>Bancos Disponibles:</span>
-                        <div className="copy-field">
-                          <strong style={{ fontSize: "0.88rem" }}>Mercantil (0105) / Banesco (0134) / BDV (0102) / Banplus (0174)</strong>
-                        </div>
+                      <div style={{ background: "#ffffff", padding: "10px 12px", borderRadius: "6px", border: "1px solid var(--border-subtle)" }}>
+                        <span style={{ fontSize: "0.72rem", color: "var(--text-muted)", display: "block" }}>Bancos Disponibles:</span>
+                        <strong style={{ fontSize: "0.85rem" }}>Mercantil (0105) / Banesco (0134) / BDV (0102)</strong>
                       </div>
 
-                      <div>
-                        <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>Monto Exacto en Bolívares:</span>
-                        <div className="copy-field" style={{ borderColor: "var(--accent-gold)" }}>
-                          <strong style={{ fontSize: "1rem", color: "var(--accent-gold)" }}>{formatBs(totalBs)}</strong>
-                          <button
-                            type="button"
-                            onClick={() => handleCopy(totalBs.toFixed(2), "pm-amount")}
-                            className="btn btn-secondary btn-sm"
-                            style={{ padding: "4px 8px" }}
-                          >
-                            {copiedField === "pm-amount" ? <Check size={14} color="var(--status-success)" /> : <Copy size={14} />}
+                      <div style={{ background: "#ffffff", padding: "10px 12px", borderRadius: "6px", border: "1px solid var(--border-blue)" }}>
+                        <span style={{ fontSize: "0.72rem", color: "var(--primary-blue)", display: "block", fontWeight: 700 }}>Monto Exacto en Bs.:</span>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                          <strong style={{ fontSize: "1.05rem", color: "var(--primary-blue)" }}>{formatBs(totalBs)}</strong>
+                          <button type="button" onClick={() => handleCopy(totalBs.toFixed(2), "pm-amount")}>
+                            {copiedField === "pm-amount" ? <Check size={14} color="#16a34a" /> : <Copy size={14} color="#64748b" />}
                           </button>
                         </div>
                       </div>
                     </div>
 
-                    {/* Inputs to confirm */}
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", paddingTop: "16px", borderTop: "1px solid var(--border-subtle)" }}>
-                      <div className="form-group">
-                        <label className="form-label">Banco desde el que realizaste el pago *</label>
-                        <select
-                          className="form-select"
-                          value={originBank}
-                          onChange={(e) => setOriginBank(e.target.value)}
-                          required
-                        >
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px" }}>
+                      <div className="form-group" style={{ marginBottom: 0 }}>
+                        <label className="form-label">Banco Emisor *</label>
+                        <select className="form-select" value={originBank} onChange={(e) => setOriginBank(e.target.value)}>
                           <option value="Mercantil">Banco Mercantil</option>
                           <option value="Banesco">Banesco</option>
                           <option value="Banco de Venezuela">Banco de Venezuela (BDV)</option>
                           <option value="Banplus">Banplus</option>
                           <option value="Bancaribe">Bancaribe</option>
-                          <option value="BNC">BNC</option>
-                          <option value="Otro">Otro Banco Nacional</option>
+                          <option value="Otro">Otro Banco</option>
                         </select>
                       </div>
 
-                      <div className="form-group">
-                        <label className="form-label">Número de Referencia (Últimos 6 u 8 dígitos) *</label>
+                      <div className="form-group" style={{ marginBottom: 0 }}>
+                        <label className="form-label">Número de Referencia (Últimos 6 dígitos) *</label>
                         <input
                           type="text"
                           className="form-input"
@@ -387,34 +384,29 @@ function CheckoutContent() {
                           required
                           value={paymentReference}
                           onChange={(e) => setPaymentReference(e.target.value)}
-                          id="pm-ref-input"
+                          id="pm-ref"
                         />
                       </div>
                     </div>
                   </div>
                 )}
 
-                {/* TRANSFERENCIA BANCARIA */}
+                {/* TRANSFERENCIA CONTENT */}
                 {paymentMethod === "transferencia" && (
-                  <div style={{ background: "var(--bg-elevated)", padding: "24px", borderRadius: "var(--radius-sm)", marginBottom: "24px" }}>
-                    <h3 style={{ fontSize: "1rem", fontWeight: 700, marginBottom: "12px", color: "var(--accent-gold)" }}>
-                      Selecciona la cuenta de destino para transferir:
-                    </h3>
-
-                    {/* Bank selector */}
-                    <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginBottom: "16px" }}>
+                  <div style={{ background: "var(--bg-primary)", padding: "20px", borderRadius: "8px", border: "1px solid var(--border-subtle)", marginBottom: "20px" }}>
+                    <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginBottom: "12px" }}>
                       {PAYMENT_CONFIG.bankAccounts.map((b) => (
                         <button
                           key={b.id}
                           type="button"
                           onClick={() => setSelectedBank(b.id)}
                           style={{
-                            padding: "8px 14px",
-                            borderRadius: "var(--radius-sm)",
-                            fontSize: "0.85rem",
-                            fontWeight: 600,
-                            background: selectedBank === b.id ? "var(--accent-gold)" : "var(--bg-surface)",
-                            color: selectedBank === b.id ? "#080a10" : "var(--text-primary)",
+                            padding: "6px 12px",
+                            borderRadius: "4px",
+                            fontSize: "0.82rem",
+                            fontWeight: 700,
+                            background: selectedBank === b.id ? "var(--primary-blue)" : "#ffffff",
+                            color: selectedBank === b.id ? "#ffffff" : "var(--text-secondary)",
                             border: "1px solid var(--border-subtle)",
                           }}
                         >
@@ -423,65 +415,21 @@ function CheckoutContent() {
                       ))}
                     </div>
 
-                    <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginBottom: "20px" }}>
-                      <div>
-                        <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>Número de Cuenta (20 dígitos):</span>
-                        <div className="copy-field">
-                          <strong style={{ fontSize: "0.95rem", letterSpacing: "0.03em" }}>{activeBankAccount.accountNumber}</strong>
-                          <button
-                            type="button"
-                            onClick={() => handleCopy(activeBankAccount.accountNumber, "acc-num")}
-                            className="btn btn-secondary btn-sm"
-                            style={{ padding: "4px 8px" }}
-                          >
-                            {copiedField === "acc-num" ? <Check size={14} color="var(--status-success)" /> : <Copy size={14} />}
-                          </button>
-                        </div>
+                    <div style={{ background: "#ffffff", padding: "12px", borderRadius: "6px", border: "1px solid var(--border-subtle)", marginBottom: "14px" }}>
+                      <span style={{ fontSize: "0.72rem", color: "var(--text-muted)", display: "block" }}>Número de Cuenta:</span>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <strong style={{ fontSize: "0.95rem", fontFamily: "monospace" }}>{activeBankAccount.accountNumber}</strong>
+                        <button type="button" onClick={() => handleCopy(activeBankAccount.accountNumber, "acc-num")}>
+                          {copiedField === "acc-num" ? <Check size={14} color="#16a34a" /> : <Copy size={14} color="#64748b" />}
+                        </button>
                       </div>
-
-                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
-                        <div>
-                          <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>Titular:</span>
-                          <div className="copy-field">
-                            <strong style={{ fontSize: "0.85rem" }}>{activeBankAccount.accountHolder}</strong>
-                          </div>
-                        </div>
-
-                        <div>
-                          <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>Cédula:</span>
-                          <div className="copy-field">
-                            <strong style={{ fontSize: "0.85rem" }}>{activeBankAccount.idCard}</strong>
-                            <button
-                              type="button"
-                              onClick={() => handleCopy(activeBankAccount.idCard, "acc-id")}
-                              className="btn btn-secondary btn-sm"
-                              style={{ padding: "4px 8px" }}
-                            >
-                              {copiedField === "acc-id" ? <Check size={14} color="var(--status-success)" /> : <Copy size={14} />}
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div>
-                        <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>Monto a transferir:</span>
-                        <div className="copy-field" style={{ borderColor: "var(--accent-gold)" }}>
-                          <strong style={{ fontSize: "1rem", color: "var(--accent-gold)" }}>{formatBs(totalBs)}</strong>
-                          <button
-                            type="button"
-                            onClick={() => handleCopy(totalBs.toFixed(2), "acc-amount")}
-                            className="btn btn-secondary btn-sm"
-                            style={{ padding: "4px 8px" }}
-                          >
-                            {copiedField === "acc-amount" ? <Check size={14} color="var(--status-success)" /> : <Copy size={14} />}
-                          </button>
-                        </div>
+                      <div style={{ fontSize: "0.78rem", color: "var(--text-secondary)", marginTop: "4px" }}>
+                        {activeBankAccount.accountHolder} • {activeBankAccount.idCard}
                       </div>
                     </div>
 
-                    {/* Reference input */}
-                    <div className="form-group" style={{ paddingTop: "14px", borderTop: "1px solid var(--border-subtle)" }}>
-                      <label className="form-label">Número de Referencia de la Transferencia *</label>
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <label className="form-label">Número de Referencia de Transferencia *</label>
                       <input
                         type="text"
                         className="form-input"
@@ -489,215 +437,108 @@ function CheckoutContent() {
                         required
                         value={paymentReference}
                         onChange={(e) => setPaymentReference(e.target.value)}
-                        id="trans-ref-input"
+                        id="trans-ref"
                       />
                     </div>
                   </div>
                 )}
 
-                {/* CRIPTO (BINANCE PAY / USDT) */}
+                {/* CRIPTO CONTENT */}
                 {paymentMethod === "binance_pay" && (
-                  <div style={{ background: "var(--bg-elevated)", padding: "24px", borderRadius: "var(--radius-sm)", marginBottom: "24px" }}>
-                    <div style={{ display: "flex", gap: "8px", marginBottom: "16px" }}>
-                      <button
-                        type="button"
-                        onClick={() => setCryptoSubtype("binance")}
-                        style={{
-                          padding: "8px 14px",
-                          borderRadius: "var(--radius-sm)",
-                          fontSize: "0.85rem",
-                          fontWeight: 600,
-                          background: cryptoSubtype === "binance" ? "var(--accent-gold)" : "var(--bg-surface)",
-                          color: cryptoSubtype === "binance" ? "#080a10" : "var(--text-primary)",
-                          border: "1px solid var(--border-subtle)",
-                        }}
-                      >
-                        Binance Pay (Recomendado)
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setCryptoSubtype("usdt")}
-                        style={{
-                          padding: "8px 14px",
-                          borderRadius: "var(--radius-sm)",
-                          fontSize: "0.85rem",
-                          fontWeight: 600,
-                          background: cryptoSubtype === "usdt" ? "var(--accent-gold)" : "var(--bg-surface)",
-                          color: cryptoSubtype === "usdt" ? "#080a10" : "var(--text-primary)",
-                          border: "1px solid var(--border-subtle)",
-                        }}
-                      >
-                        USDT Directo (Redes TRC20 / BEP20)
-                      </button>
+                  <div style={{ background: "var(--bg-primary)", padding: "20px", borderRadius: "8px", border: "1px solid var(--border-subtle)", marginBottom: "20px" }}>
+                    <div style={{ background: "#ffffff", padding: "12px", borderRadius: "6px", border: "1px solid var(--border-subtle)", marginBottom: "14px" }}>
+                      <span style={{ fontSize: "0.72rem", color: "var(--text-muted)", display: "block" }}>Binance Pay ID:</span>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <strong style={{ fontSize: "1.1rem", color: "var(--primary-blue)" }}>{PAYMENT_CONFIG.crypto.binancePay.payId}</strong>
+                        <button type="button" onClick={() => handleCopy(PAYMENT_CONFIG.crypto.binancePay.payId, "bp-id")}>
+                          {copiedField === "bp-id" ? <Check size={14} color="#16a34a" /> : <Copy size={14} color="#64748b" />}
+                        </button>
+                      </div>
+                      <div style={{ fontSize: "0.78rem", color: "var(--text-secondary)", marginTop: "2px" }}>
+                        Monto exacto: <strong>{totalUsd.toFixed(2)} USDT</strong>
+                      </div>
                     </div>
 
-                    {cryptoSubtype === "binance" ? (
-                      <div>
-                        <p style={{ fontSize: "0.85rem", color: "var(--text-secondary)", marginBottom: "16px" }}>
-                          Transfiere directamente sin comisiones mediante <strong>Binance Pay</strong> en la app de Binance:
-                        </p>
-                        <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginBottom: "20px" }}>
-                          <div>
-                            <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>Binance Pay ID:</span>
-                            <div className="copy-field">
-                              <strong style={{ fontSize: "1.05rem", color: "var(--accent-gold)" }}>{PAYMENT_CONFIG.crypto.binancePay.payId}</strong>
-                              <button
-                                type="button"
-                                onClick={() => handleCopy(PAYMENT_CONFIG.crypto.binancePay.payId, "bp-id")}
-                                className="btn btn-secondary btn-sm"
-                                style={{ padding: "4px 8px" }}
-                              >
-                                {copiedField === "bp-id" ? <Check size={14} color="var(--status-success)" /> : <Copy size={14} />}
-                              </button>
-                            </div>
-                          </div>
-
-                          <div>
-                            <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>Monto Exacto a Enviar:</span>
-                            <div className="copy-field">
-                              <strong style={{ fontSize: "1.05rem" }}>{totalUsd.toFixed(2)} USDT</strong>
-                              <button
-                                type="button"
-                                onClick={() => handleCopy(totalUsd.toFixed(2), "bp-amount")}
-                                className="btn btn-secondary btn-sm"
-                                style={{ padding: "4px 8px" }}
-                              >
-                                {copiedField === "bp-amount" ? <Check size={14} color="var(--status-success)" /> : <Copy size={14} />}
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="form-group">
-                          <label className="form-label">ID de la Transacción / Orden de Binance Pay *</label>
-                          <input
-                            type="text"
-                            className="form-input"
-                            placeholder="Ej: 298471029"
-                            required
-                            value={cryptoTxId}
-                            onChange={(e) => setCryptoTxId(e.target.value)}
-                            id="binance-order-id"
-                          />
-                        </div>
-                      </div>
-                    ) : (
-                      <div>
-                        <p style={{ fontSize: "0.85rem", color: "var(--text-secondary)", marginBottom: "16px" }}>
-                          Billeteras oficiales para depósito directo en USDT:
-                        </p>
-                        <div style={{ display: "flex", flexDirection: "column", gap: "12px", marginBottom: "20px" }}>
-                          {PAYMENT_CONFIG.crypto.usdtWallets.map((w, idx) => (
-                            <div key={idx}>
-                              <span style={{ fontSize: "0.75rem", color: "var(--accent-gold)", fontWeight: 600 }}>{w.network}:</span>
-                              <div className="copy-field">
-                                <span style={{ fontSize: "0.82rem", fontFamily: "monospace", overflow: "hidden", textOverflow: "ellipsis" }}>
-                                  {w.address}
-                                </span>
-                                <button
-                                  type="button"
-                                  onClick={() => handleCopy(w.address || "", `wallet-${idx}`)}
-                                  className="btn btn-secondary btn-sm"
-                                  style={{ padding: "4px 8px", flexShrink: 0 }}
-                                >
-                                  {copiedField === `wallet-${idx}` ? <Check size={14} color="var(--status-success)" /> : <Copy size={14} />}
-                                </button>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-
-                        <div className="form-group">
-                          <label className="form-label">Hash de la Transacción (TXID) *</label>
-                          <input
-                            type="text"
-                            className="form-input"
-                            placeholder="0x... o TXID"
-                            required
-                            value={cryptoTxId}
-                            onChange={(e) => setCryptoTxId(e.target.value)}
-                            id="crypto-txid-input"
-                          />
-                        </div>
-                      </div>
-                    )}
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <label className="form-label">ID de Orden / Transacción Binance *</label>
+                      <input
+                        type="text"
+                        className="form-input"
+                        placeholder="Ej: 298471029"
+                        required
+                        value={cryptoTxId}
+                        onChange={(e) => setCryptoTxId(e.target.value)}
+                        id="crypto-id"
+                      />
+                    </div>
                   </div>
                 )}
 
                 {errorMsg && (
-                  <div style={{ background: "var(--status-error-bg)", border: "1px solid var(--status-error)", color: "#fca5a5", padding: "12px 16px", borderRadius: "var(--radius-sm)", marginBottom: "16px", fontSize: "0.9rem" }}>
-                    {errorMsg}
+                  <div style={{ background: "var(--status-error-bg)", border: "1px solid var(--status-error)", color: "var(--status-error)", padding: "10px 14px", borderRadius: "6px", fontSize: "0.85rem", display: "flex", alignItems: "center", gap: "8px" }}>
+                    <AlertCircle size={16} />
+                    <span>{errorMsg}</span>
                   </div>
                 )}
               </div>
             </div>
 
-            {/* Right Column: Order Summary Box */}
-            <div>
-              <div
-                className="card"
-                style={{
-                  padding: "28px",
-                  position: "sticky",
-                  top: "100px",
-                  border: "2px solid var(--border-gold)",
-                }}
-              >
-                <h3 style={{ fontSize: "1.2rem", fontWeight: 800, marginBottom: "18px" }}>
+            {/* Right Column: Order Summary */}
+            <div style={{ position: "sticky", top: "88px" }}>
+              <div className="clean-event-card" style={{ padding: "24px" }}>
+                <h3 style={{ fontSize: "1.15rem", fontWeight: 800, color: "var(--text-primary)", marginBottom: "16px" }}>
                   Resumen de la Orden
                 </h3>
 
-                <div style={{ paddingBottom: "16px", borderBottom: "1px solid var(--border-subtle)", marginBottom: "16px" }}>
-                  <div style={{ fontWeight: 700, fontSize: "1.05rem", color: "var(--text-primary)", marginBottom: "4px" }}>
+                <div style={{ paddingBottom: "14px", borderBottom: "1px solid var(--border-subtle)", marginBottom: "14px" }}>
+                  <div style={{ fontWeight: 700, fontSize: "0.98rem", color: "var(--text-primary)", marginBottom: "2px" }}>
                     {event.title}
                   </div>
-                  <div style={{ fontSize: "0.85rem", color: "var(--accent-gold)", marginBottom: "4px" }}>
-                    Pase: {tier.name}
-                  </div>
-                  <div style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>
+                  <span className="badge badge-online">{tier.name}</span>
+                  <div style={{ fontSize: "0.78rem", color: "var(--text-muted)", marginTop: "4px" }}>
                     {event.date} • {event.location}
                   </div>
                 </div>
 
-                <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginBottom: "20px", fontSize: "0.9rem" }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: "8px", fontSize: "0.85rem", marginBottom: "18px" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", color: "var(--text-secondary)" }}>
                     <span>Cantidad:</span>
-                    <strong style={{ color: "var(--text-primary)" }}>{quantity} boleto{quantity > 1 ? "s" : ""}</strong>
+                    <strong>{quantity} boleto{quantity > 1 ? "s" : ""}</strong>
                   </div>
                   <div style={{ display: "flex", justifyContent: "space-between", color: "var(--text-secondary)" }}>
-                    <span>Precio unitario:</span>
+                    <span>Precio Unitario:</span>
                     <span>{formatUsd(tier.priceUsd)}</span>
                   </div>
                   <div style={{ display: "flex", justifyContent: "space-between", color: "var(--text-secondary)" }}>
-                    <span>Tasa oficial BCV:</span>
+                    <span>Tasa Oficial BCV:</span>
                     <span>{bcvRate} Bs/USD</span>
                   </div>
                 </div>
 
                 {/* Total Box */}
-                <div style={{ background: "var(--bg-elevated)", padding: "16px", borderRadius: "var(--radius-sm)", marginBottom: "24px" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.85rem", color: "var(--text-muted)", marginBottom: "4px" }}>
-                    <span>Total en Dólares:</span>
-                    <span style={{ color: "var(--text-primary)", fontWeight: 700 }}>{formatUsd(totalUsd)}</span>
+                <div style={{ background: "var(--bg-primary)", padding: "14px", borderRadius: "8px", border: "1px solid var(--border-subtle)", marginBottom: "18px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.82rem", color: "var(--text-muted)" }}>
+                    <span>Total USD:</span>
+                    <strong style={{ color: "var(--text-primary)" }}>{formatUsd(totalUsd)}</strong>
                   </div>
-                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "1.2rem", fontWeight: 800 }}>
-                    <span>Total en Bs.:</span>
-                    <span style={{ color: "var(--accent-gold)" }}>{formatBs(totalBs)}</span>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "1.15rem", fontWeight: 800 }}>
+                    <span>Total Bs.:</span>
+                    <span style={{ color: "var(--primary-blue)" }}>{formatBs(totalBs)}</span>
                   </div>
                 </div>
 
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="btn btn-primary btn-lg"
-                  style={{ width: "100%", marginBottom: "16px" }}
-                  id="btn-confirm-payment"
+                  className="btn btn-primary"
+                  style={{ width: "100%", padding: "14px", fontSize: "1rem", marginBottom: "12px" }}
+                  id="btn-confirm-checkout"
                 >
-                  {isSubmitting ? "Procesando Boleto..." : "Confirmar y Emitir Boleto"}
+                  {isSubmitting ? "Emitiendo Boleto..." : "Confirmar y Emitir Boleto"}
                 </button>
 
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", fontSize: "0.78rem", color: "var(--text-muted)", textAlign: "center" }}>
-                  <ShieldCheck size={16} color="var(--status-success)" />
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", fontSize: "0.75rem", color: "var(--text-muted)", textAlign: "center" }}>
+                  <ShieldCheck size={14} color="#16a34a" />
                   <span>Tu boleto se genera al instante con código QR digital para acceso en puerta</span>
                 </div>
               </div>

@@ -49,34 +49,35 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
               alignItems: "center",
               gap: "8px",
               color: "var(--text-secondary)",
-              fontSize: "0.9rem",
+              fontSize: "0.88rem",
             }}
           >
             <ArrowLeft size={16} /> Volver a la cartelera de eventos
           </Link>
         </div>
 
-        {/* Hero Banner Card */}
+        {/* Hero Banner Card (Clean aesthetic) */}
         <div
-          className="card"
+          className="clean-event-card"
           style={{
             position: "relative",
-            minHeight: "360px",
+            minHeight: "340px",
             display: "flex",
             flexDirection: "column",
             justifyContent: "flex-end",
             padding: "40px 32px",
-            marginBottom: "40px",
-            borderRadius: "var(--radius-lg)",
+            marginBottom: "36px",
+            borderRadius: "16px",
             overflow: "hidden",
+            color: "#ffffff",
           }}
         >
-          {/* Background image with dark overlay */}
+          {/* Background image with overlay */}
           <div
             style={{
               position: "absolute",
               inset: 0,
-              backgroundImage: `linear-gradient(180deg, rgba(8, 10, 16, 0.4) 0%, rgba(8, 10, 16, 0.95) 100%), url(${event.bannerUrl})`,
+              backgroundImage: `linear-gradient(180deg, rgba(15, 23, 42, 0.3) 0%, rgba(15, 23, 42, 0.9) 100%), url(${event.bannerUrl})`,
               backgroundSize: "cover",
               backgroundPosition: "center",
               zIndex: 1,
@@ -84,44 +85,37 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
           />
 
           <div style={{ position: "relative", zIndex: 2, maxWidth: "800px" }}>
-            <div style={{ display: "flex", gap: "10px", marginBottom: "14px", flexWrap: "wrap" }}>
+            <div style={{ display: "flex", gap: "8px", marginBottom: "12px", flexWrap: "wrap" }}>
               {event.format === "presencial" && (
-                <span className="badge badge-presencial">
-                  <MapPin size={12} /> Presencial
-                </span>
+                <span className="badge badge-presencial">Presencial</span>
               )}
               {event.format === "online" && (
-                <span className="badge badge-online">
-                  <Video size={12} /> Streaming Online HD
-                </span>
+                <span className="badge badge-online">Streaming Online HD</span>
               )}
               {event.format === "hibrido" && (
-                <span className="badge badge-hibrido">
-                  <Users size={12} /> Formato Híbrido
-                </span>
+                <span className="badge badge-hibrido">Formato Híbrido</span>
               )}
               <span className="badge badge-gold">{event.category}</span>
             </div>
 
-            <h1 style={{ fontSize: "clamp(2rem, 4vw, 3rem)", fontWeight: 900, marginBottom: "12px", lineHeight: "1.15" }}>
+            <h1 style={{ fontSize: "clamp(1.8rem, 3.5vw, 2.7rem)", fontWeight: 900, marginBottom: "10px", lineHeight: "1.2" }}>
               {event.title}
             </h1>
-            <p style={{ color: "var(--text-secondary)", fontSize: "1.1rem", marginBottom: "24px" }}>
+            <p style={{ color: "rgba(255, 255, 255, 0.9)", fontSize: "1.05rem", marginBottom: "20px" }}>
               {event.subtitle}
             </p>
 
-            {/* Quick Specs */}
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "24px", fontSize: "0.92rem", color: "var(--text-primary)" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                <Calendar size={18} color="var(--accent-gold)" />
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "20px", fontSize: "0.88rem", color: "#f8fafc" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                <Calendar size={16} color="var(--primary-blue-light)" />
                 <strong>{event.date}</strong>
               </div>
-              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                <Clock size={18} color="var(--accent-gold)" />
+              <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                <Clock size={16} color="var(--primary-blue-light)" />
                 <span>{event.time}</span>
               </div>
-              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                <MapPin size={18} color="var(--accent-gold)" />
+              <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                <MapPin size={16} color="var(--primary-blue-light)" />
                 <span>{event.location} ({event.city})</span>
               </div>
             </div>
@@ -129,48 +123,49 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
         </div>
 
         {/* 2-Column Layout: Details on Left, Ticket Box on Right */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 420px", gap: "40px", alignItems: "start" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 400px", gap: "36px", alignItems: "start" }}>
           {/* Left Column: Event Info */}
           <div>
             {/* Description */}
-            <section className="glass-panel" style={{ padding: "32px", marginBottom: "32px" }}>
-              <h2 style={{ fontSize: "1.4rem", fontWeight: 700, marginBottom: "16px", color: "var(--accent-gold)" }}>
+            <section className="clean-event-card" style={{ padding: "32px", marginBottom: "28px" }}>
+              <h2 style={{ fontSize: "1.3rem", fontWeight: 800, marginBottom: "16px", color: "var(--text-primary)" }}>
                 Acerca de este evento
               </h2>
-              <p style={{ color: "var(--text-secondary)", fontSize: "1.05rem", lineHeight: "1.8", whiteSpace: "pre-line" }}>
+              <p style={{ color: "var(--text-secondary)", fontSize: "0.98rem", lineHeight: "1.7", whiteSpace: "pre-line" }}>
                 {event.description}
               </p>
             </section>
 
             {/* Speakers */}
-            <section className="glass-panel" style={{ padding: "32px", marginBottom: "32px" }}>
-              <h2 style={{ fontSize: "1.4rem", fontWeight: 700, marginBottom: "20px" }}>
+            <section className="clean-event-card" style={{ padding: "32px", marginBottom: "28px" }}>
+              <h2 style={{ fontSize: "1.3rem", fontWeight: 800, marginBottom: "20px", color: "var(--text-primary)" }}>
                 Ponentes e Instructores
               </h2>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "20px" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "16px" }}>
                 {event.speakers.map((spk, idx) => (
                   <div
                     key={idx}
                     style={{
                       display: "flex",
                       alignItems: "center",
-                      gap: "14px",
-                      background: "var(--bg-elevated)",
-                      padding: "16px",
-                      borderRadius: "var(--radius-sm)",
+                      gap: "12px",
+                      background: "var(--bg-primary)",
+                      padding: "14px",
+                      borderRadius: "8px",
+                      border: "1px solid var(--border-subtle)",
                     }}
                   >
                     <Image
                       src={spk.avatarUrl}
                       alt={spk.name}
-                      width={56}
-                      height={56}
+                      width={50}
+                      height={50}
                       style={{ borderRadius: "50%", objectFit: "cover" }}
                     />
                     <div>
-                      <h4 style={{ fontSize: "1rem", fontWeight: 700, marginBottom: "2px" }}>{spk.name}</h4>
-                      <p style={{ fontSize: "0.82rem", color: "var(--accent-gold)" }}>{spk.role}</p>
-                      <p style={{ fontSize: "0.78rem", color: "var(--text-muted)" }}>{spk.company}</p>
+                      <h4 style={{ fontSize: "0.95rem", fontWeight: 700, marginBottom: "2px", color: "var(--text-primary)" }}>{spk.name}</h4>
+                      <p style={{ fontSize: "0.78rem", color: "var(--primary-blue)", fontWeight: 600 }}>{spk.role}</p>
+                      <p style={{ fontSize: "0.74rem", color: "var(--text-muted)" }}>{spk.company}</p>
                     </div>
                   </div>
                 ))}
@@ -178,30 +173,30 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
             </section>
 
             {/* Agenda Schedule */}
-            <section className="glass-panel" style={{ padding: "32px" }}>
-              <h2 style={{ fontSize: "1.4rem", fontWeight: 700, marginBottom: "20px" }}>
+            <section className="clean-event-card" style={{ padding: "32px" }}>
+              <h2 style={{ fontSize: "1.3rem", fontWeight: 800, marginBottom: "20px", color: "var(--text-primary)" }}>
                 Programa y Cronograma
               </h2>
-              <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
                 {event.schedule.map((sch, idx) => (
                   <div
                     key={idx}
                     style={{
                       display: "grid",
-                      gridTemplateColumns: "110px 1fr",
-                      gap: "16px",
-                      paddingBottom: "16px",
+                      gridTemplateColumns: "100px 1fr",
+                      gap: "14px",
+                      paddingBottom: "14px",
                       borderBottom: idx < event.schedule.length - 1 ? "1px solid var(--border-subtle)" : "none",
                     }}
                   >
-                    <div style={{ fontWeight: 700, color: "var(--accent-gold)", fontSize: "0.95rem" }}>
+                    <div style={{ fontWeight: 800, color: "var(--primary-blue)", fontSize: "0.9rem" }}>
                       {sch.time}
                     </div>
                     <div>
-                      <div style={{ fontWeight: 600, fontSize: "1rem", marginBottom: "4px" }}>
+                      <div style={{ fontWeight: 700, fontSize: "0.95rem", color: "var(--text-primary)", marginBottom: "2px" }}>
                         {sch.title}
                       </div>
-                      <div style={{ fontSize: "0.85rem", color: "var(--text-secondary)" }}>
+                      <div style={{ fontSize: "0.82rem", color: "var(--text-secondary)" }}>
                         {sch.speaker}
                       </div>
                     </div>
@@ -212,26 +207,25 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
           </div>
 
           {/* Right Column: Sticky Ticket Selector Engine */}
-          <div style={{ position: "sticky", top: "100px" }}>
+          <div style={{ position: "sticky", top: "88px" }}>
             <div
-              className="card"
+              className="clean-event-card"
               style={{
-                padding: "30px",
-                border: "2px solid var(--border-gold)",
-                boxShadow: "var(--shadow-gold)",
+                padding: "26px",
+                borderTop: "4px solid var(--primary-blue)",
               }}
             >
-              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "16px" }}>
-                <Ticket size={20} color="var(--accent-gold)" />
-                <h3 style={{ fontSize: "1.25rem", fontWeight: 800 }}>Tiquetera Oficial</h3>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "14px" }}>
+                <Ticket size={20} color="var(--primary-blue)" />
+                <h3 style={{ fontSize: "1.2rem", fontWeight: 800, color: "var(--text-primary)" }}>Selección de Boletos</h3>
               </div>
 
-              <p style={{ fontSize: "0.88rem", color: "var(--text-secondary)", marginBottom: "20px" }}>
-                Selecciona la categoría de boleto que deseas adquirir:
+              <p style={{ fontSize: "0.85rem", color: "var(--text-secondary)", marginBottom: "18px" }}>
+                Elige la localidad o pase que deseas adquirir:
               </p>
 
               {/* Tiers List */}
-              <div style={{ display: "flex", flexDirection: "column", gap: "14px", marginBottom: "24px" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "12px", marginBottom: "20px" }}>
                 {event.tiers.map((tier) => {
                   const isSelected = selectedTierId === tier.id;
                   const tierPrice = formatPrice(tier.priceUsd);
@@ -240,32 +234,38 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
                     <div
                       key={tier.id}
                       onClick={() => setSelectedTierId(tier.id)}
-                      className={`tier-card ${isSelected ? "selected" : ""}`}
-                      style={{ cursor: "pointer" }}
+                      style={{
+                        padding: "14px",
+                        borderRadius: "8px",
+                        border: isSelected ? "2px solid var(--primary-blue)" : "1px solid var(--border-subtle)",
+                        background: isSelected ? "var(--primary-blue-light)" : "#ffffff",
+                        cursor: "pointer",
+                        transition: "all 0.15s ease",
+                      }}
                       id={`tier-select-${tier.id}`}
                     >
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "6px" }}>
-                        <div style={{ fontWeight: 700, fontSize: "1.05rem", color: isSelected ? "var(--accent-gold)" : "var(--text-primary)" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "4px" }}>
+                        <div style={{ fontWeight: 700, fontSize: "0.98rem", color: isSelected ? "var(--primary-blue)" : "var(--text-primary)" }}>
                           {tier.name}
                         </div>
                         <div style={{ textAlign: "right" }}>
-                          <span style={{ fontWeight: 800, fontSize: "1.1rem", color: "var(--accent-gold)" }}>
+                          <span style={{ fontWeight: 800, fontSize: "1.05rem", color: "var(--primary-blue)" }}>
                             {tierPrice.main}
                           </span>
-                          <div style={{ fontSize: "0.75rem", color: "var(--text-secondary)" }}>
+                          <div style={{ fontSize: "0.72rem", color: "var(--text-muted)" }}>
                             {tierPrice.secondary}
                           </div>
                         </div>
                       </div>
 
-                      <p style={{ fontSize: "0.82rem", color: "var(--text-secondary)", marginBottom: "12px" }}>
+                      <p style={{ fontSize: "0.8rem", color: "var(--text-secondary)", marginBottom: "8px" }}>
                         {tier.description}
                       </p>
 
-                      <ul className="tier-perks-list">
+                      <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: "4px", fontSize: "0.78rem", color: "var(--text-secondary)" }}>
                         {tier.perks.map((perk, i) => (
-                          <li key={i} className="tier-perk-item">
-                            <CheckCircle2 size={14} color="var(--status-success)" style={{ flexShrink: 0 }} />
+                          <li key={i} style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                            <CheckCircle2 size={12} color="#16a34a" style={{ flexShrink: 0 }} />
                             <span>{perk}</span>
                           </li>
                         ))}
@@ -276,20 +276,19 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
               </div>
 
               {/* Quantity Selector */}
-              <div style={{ marginBottom: "24px" }}>
-                <label className="form-label">Cantidad de Boletos</label>
-                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              <div style={{ marginBottom: "20px" }}>
+                <label className="form-label" style={{ fontSize: "0.82rem" }}>Cantidad de Boletos</label>
+                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                   <button
                     type="button"
                     className="btn btn-secondary btn-sm"
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
                     disabled={quantity <= 1}
-                    style={{ width: "42px", height: "42px", padding: 0 }}
-                    id="btn-qty-minus"
+                    style={{ width: "36px", height: "36px", padding: 0 }}
                   >
                     -
                   </button>
-                  <span style={{ fontSize: "1.2rem", fontWeight: 800, minWidth: "40px", textAlign: "center" }}>
+                  <span style={{ fontSize: "1.1rem", fontWeight: 800, minWidth: "32px", textAlign: "center" }}>
                     {quantity}
                   </span>
                   <button
@@ -297,13 +296,12 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
                     className="btn btn-secondary btn-sm"
                     onClick={() => setQuantity(Math.min(5, quantity + 1))}
                     disabled={quantity >= 5}
-                    style={{ width: "42px", height: "42px", padding: 0 }}
-                    id="btn-qty-plus"
+                    style={{ width: "36px", height: "36px", padding: 0 }}
                   >
                     +
                   </button>
-                  <span style={{ fontSize: "0.82rem", color: "var(--text-muted)" }}>
-                    (Máximo 5 por orden)
+                  <span style={{ fontSize: "0.78rem", color: "var(--text-muted)" }}>
+                    (Máx. 5 por orden)
                   </span>
                 </div>
               </div>
@@ -311,39 +309,40 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
               {/* Price Calculation Box */}
               <div
                 style={{
-                  background: "var(--bg-elevated)",
-                  borderRadius: "var(--radius-sm)",
-                  padding: "16px",
-                  marginBottom: "20px",
+                  background: "var(--bg-primary)",
+                  borderRadius: "8px",
+                  padding: "14px",
+                  marginBottom: "18px",
+                  border: "1px solid var(--border-subtle)",
                 }}
               >
-                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px", fontSize: "0.88rem", color: "var(--text-secondary)" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px", fontSize: "0.82rem", color: "var(--text-secondary)" }}>
                   <span>Subtotal ({quantity} boleto{quantity > 1 ? "s" : ""}):</span>
                   <span>{priceDisplay.main}</span>
                 </div>
                 <div style={{ display: "flex", justifyContent: "space-between", fontSize: "1.1rem", fontWeight: 800, color: "var(--text-primary)" }}>
                   <span>Total a Pagar:</span>
-                  <span style={{ color: "var(--accent-gold)" }}>{priceDisplay.main}</span>
+                  <span style={{ color: "var(--primary-blue)" }}>{priceDisplay.main}</span>
                 </div>
-                <div style={{ textAlign: "right", fontSize: "0.8rem", color: "var(--text-secondary)", marginTop: "4px" }}>
-                  Equivalente: <strong>{priceDisplay.secondary}</strong> (Tasa BCV {rate} Bs/$)
+                <div style={{ textAlign: "right", fontSize: "0.78rem", color: "var(--accent-gold)", fontWeight: 600, marginTop: "2px" }}>
+                  Equivalente: {priceDisplay.secondary} (Tasa BCV {rate} Bs/$)
                 </div>
               </div>
 
               {/* Action Button */}
               <button
                 type="button"
-                className="btn btn-primary btn-lg"
-                style={{ width: "100%", marginBottom: "14px" }}
+                className="btn btn-primary"
+                style={{ width: "100%", padding: "14px", fontSize: "1rem", marginBottom: "12px" }}
                 onClick={handleProceedToCheckout}
                 id="btn-proceed-checkout"
               >
-                Continuar al Pago <ChevronRight size={18} />
+                Comprar Boletos <ChevronRight size={18} />
               </button>
 
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", fontSize: "0.78rem", color: "var(--text-muted)" }}>
-                <ShieldCheck size={14} color="var(--status-success)" />
-                <span>Pago Móvil, Transferencias y Binance Pay habilitados</span>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", fontSize: "0.75rem", color: "var(--text-muted)" }}>
+                <ShieldCheck size={14} color="#16a34a" />
+                <span>Pago Móvil, Transferencias y Binance Pay autorizados</span>
               </div>
             </div>
           </div>

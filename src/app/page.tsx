@@ -2,118 +2,161 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import {
   Ticket,
-  Sparkles,
+  Calendar,
+  MapPin,
+  Clock,
+  ArrowRight,
   ShieldCheck,
   Zap,
-  Globe,
-  ArrowRight,
+  Smartphone,
   Video,
-  MapPin,
-  QrCode,
-  PackageOpen,
-  CheckCircle2,
 } from "lucide-react";
-import { SHAMA_EVENTS } from "@/lib/data";
-import { EventFormat } from "@/lib/types";
+import { getAllEvents } from "@/lib/services/event-service";
+import EventSearchRibbon from "@/components/EventSearchRibbon";
 import EventCard from "@/components/EventCard";
 import { useCurrency } from "@/components/CurrencyContext";
 
 export default function HomePage() {
-  const [selectedFormat, setSelectedFormat] = useState<string>("todos");
-  const { rate } = useCurrency();
+  const allEvents = getAllEvents();
+  const featured = allEvents[0];
+  const { formatPrice } = useCurrency();
+  const [activeCategory, setActiveCategory] = useState("todas");
 
-  const filteredEvents = SHAMA_EVENTS.filter((e) => {
-    if (selectedFormat === "todos") return true;
-    return e.format === selectedFormat;
+  const filteredEvents = allEvents.filter((e) => {
+    if (activeCategory === "todas") return true;
+    return e.category.toLowerCase() === activeCategory.toLowerCase();
   });
+
+  const featuredMinPrice = Math.min(...featured.tiers.map((t) => t.priceUsd));
+  const featuredPrice = formatPrice(featuredMinPrice);
 
   return (
     <div>
-      {/* ================= HERO SECTION ================= */}
-      <section className="hero">
+      {/* 1. Integrated Search Ribbon (La Tiquetera style) */}
+      <EventSearchRibbon />
+
+      {/* 2. Featured Big Hero Event Banner (La Tiquetera style) */}
+      <section style={{ padding: "36px 0 20px" }}>
         <div className="container">
-          <div className="hero-tag">
-            <Sparkles size={16} /> PRODUCCIÓN AUDIOVISUAL & EVENTOS EN VIVO
-          </div>
-
-          <h1 className="hero-title">
-            Experiencias de Alto Impacto, <span className="gradient-text">Conferencias & Masterclasses</span>
-          </h1>
-
-          <p className="hero-subtitle">
-            Tiquetera 100% digital para eventos presenciales y conferencias online en Venezuela.
-            Paga en Bolívares con <strong>Pago Móvil, Transferencias nacionales o Cripto (USDT)</strong> y recibe tu boleto con QR dinámico anti-fraude.
-          </p>
-
-          <div className="hero-buttons">
-            <Link href="/eventos" className="btn btn-primary btn-lg" id="hero-cta-events">
-              <Ticket size={20} /> Explorar Cartelera de Eventos
-            </Link>
-            <Link href="/validador" className="btn btn-secondary btn-lg" id="hero-cta-validator">
-              <QrCode size={20} /> Validador en Puerta (Staff)
-            </Link>
-          </div>
-
-          {/* Stats Bar */}
-          <div className="hero-stats">
-            <div className="stat-item">
-              <div className="stat-value">4+</div>
-              <div className="stat-label">Eventos Flagship 2026</div>
+          <div
+            style={{
+              background: "#ffffff",
+              borderRadius: "16px",
+              overflow: "hidden",
+              border: "1px solid var(--border-subtle)",
+              boxShadow: "var(--shadow-card-hover)",
+              display: "grid",
+              gridTemplateColumns: "1.2fr 1fr",
+            }}
+          >
+            {/* Banner image */}
+            <div style={{ position: "relative", minHeight: "340px" }}>
+              <Image
+                src={featured.bannerUrl}
+                alt={featured.title}
+                fill
+                priority
+                sizes="(max-width: 900px) 100vw, 55vw"
+                style={{ objectFit: "cover" }}
+              />
+              <div
+                style={{
+                  position: "absolute",
+                  top: "16px",
+                  left: "16px",
+                  background: "var(--bg-header-main)",
+                  color: "#ffffff",
+                  padding: "6px 14px",
+                  borderRadius: "6px",
+                  fontWeight: 800,
+                  fontSize: "0.78rem",
+                  letterSpacing: "0.05em",
+                  textTransform: "uppercase",
+                }}
+              >
+                EVENTO DESTACADO
+              </div>
             </div>
-            <div className="stat-item">
-              <div className="stat-value">100%</div>
-              <div className="stat-label">Boletos Digitales con Cifrado</div>
-            </div>
-            <div className="stat-item">
-              <div className="stat-value">Bs / USDT</div>
-              <div className="stat-label">Tasa Oficial BCV ({rate} Bs/$)</div>
-            </div>
-            <div className="stat-item">
-              <div className="stat-value">&lt; 3 seg</div>
-              <div className="stat-label">Check-in Express en Entrada</div>
+
+            {/* Content */}
+            <div style={{ padding: "36px 32px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
+              <span className="badge badge-gold" style={{ alignSelf: "flex-start", marginBottom: "10px" }}>
+                {featured.category}
+              </span>
+              <h2 style={{ fontSize: "clamp(1.5rem, 2.5vw, 2rem)", fontWeight: 900, color: "var(--text-primary)", lineHeight: "1.2", marginBottom: "12px" }}>
+                {featured.title}
+              </h2>
+              <p style={{ color: "var(--text-secondary)", fontSize: "0.95rem", lineHeight: "1.6", marginBottom: "20px" }}>
+                {featured.subtitle}
+              </p>
+
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "16px", fontSize: "0.85rem", color: "var(--text-secondary)", marginBottom: "24px" }}>
+                <span style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+                  <Calendar size={15} color="var(--primary-blue)" /> <strong>{featured.date}</strong>
+                </span>
+                <span style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+                  <MapPin size={15} color="var(--primary-blue)" /> {featured.location}
+                </span>
+              </div>
+
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingTop: "18px", borderTop: "1px solid var(--border-subtle)" }}>
+                <div>
+                  <span style={{ fontSize: "0.72rem", color: "var(--text-muted)", textTransform: "uppercase" }}>Desde</span>
+                  <div style={{ fontSize: "1.4rem", fontWeight: 900, color: "var(--primary-blue)" }}>
+                    {featuredPrice.main}
+                  </div>
+                </div>
+
+                <Link href={`/eventos/${featured.slug}`} className="btn btn-primary" id="btn-featured-buy">
+                  Comprar Boletos <ArrowRight size={16} />
+                </Link>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ================= FEATURED EVENTS SECTION ================= */}
-      <section style={{ padding: "60px 0 80px" }}>
+      {/* 3. Event Catalog with Quick Category Pills */}
+      <section style={{ padding: "40px 0 60px" }}>
         <div className="container">
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap", gap: "20px", marginBottom: "30px" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "16px", marginBottom: "28px" }}>
             <div>
-              <span className="badge badge-gold" style={{ marginBottom: "8px" }}>
-                Cartelera Oficial
-              </span>
-              <h2 style={{ fontSize: "2.2rem", fontWeight: 800 }}>Próximos Eventos & Masterclasses</h2>
-              <p style={{ color: "var(--text-secondary)", fontSize: "0.95rem" }}>
-                Selecciona tu formato preferido y asegura tu cupo de forma inmediata.
+              <h2 style={{ fontSize: "1.7rem", fontWeight: 800, color: "var(--text-primary)" }}>
+                Cartelera Oficial de Eventos
+              </h2>
+              <p style={{ fontSize: "0.92rem", color: "var(--text-secondary)" }}>
+                Selecciona tu evento y adquiere tus pases digitales con Pago Móvil, transferencia o Cripto.
               </p>
             </div>
 
-            {/* Filter pills */}
-            <div style={{ display: "flex", gap: "8px", background: "var(--bg-surface)", padding: "4px", borderRadius: "var(--radius-full)", border: "1px solid var(--border-subtle)" }}>
+            {/* Quick Pills */}
+            <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
               {[
-                { id: "todos", label: "Todos" },
-                { id: "presencial", label: "Presenciales" },
-                { id: "online", label: "Online" },
-                { id: "hibrido", label: "Híbridos" },
+                { id: "todas", label: "Todos" },
+                { id: "conferencia", label: "Conferencias" },
+                { id: "masterclass", label: "Masterclasses" },
+                { id: "taller", label: "Talleres" },
+                { id: "seminario", label: "Seminarios Online" },
               ].map((pill) => (
                 <button
                   key={pill.id}
                   type="button"
-                  onClick={() => setSelectedFormat(pill.id)}
+                  onClick={() => setActiveCategory(pill.id)}
                   style={{
-                    padding: "8px 16px",
-                    borderRadius: "var(--radius-full)",
-                    fontSize: "0.85rem",
-                    fontWeight: 600,
-                    background: selectedFormat === pill.id ? "var(--accent-gold)" : "transparent",
-                    color: selectedFormat === pill.id ? "#080a10" : "var(--text-secondary)",
-                    transition: "all 0.2s ease",
+                    padding: "6px 14px",
+                    borderRadius: "6px",
+                    fontSize: "0.82rem",
+                    fontWeight: 700,
+                    background: activeCategory === pill.id ? "var(--primary-blue)" : "#ffffff",
+                    color: activeCategory === pill.id ? "#ffffff" : "var(--text-secondary)",
+                    border: "1px solid var(--border-subtle)",
+                    boxShadow: "var(--shadow-sm)",
+                    transition: "all 0.15s ease",
                   }}
-                  id={`filter-${pill.id}`}
+                  id={`cat-pill-${pill.id}`}
                 >
                   {pill.label}
                 </button>
@@ -122,7 +165,7 @@ export default function HomePage() {
           </div>
 
           {/* Grid of Events */}
-          <div className="events-grid">
+          <div className="events-clean-grid">
             {filteredEvents.map((evt) => (
               <EventCard key={evt.id} event={evt} />
             ))}
@@ -130,105 +173,57 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ================= VALUE PROPOSITION / FEATURES ================= */}
-      <section style={{ padding: "70px 0", background: "var(--bg-surface)", borderTop: "1px solid var(--border-subtle)", borderBottom: "1px solid var(--border-subtle)" }}>
+      {/* 4. Why Shama Tiquetera? (Trust & Venezuelan Payment Benefits) */}
+      <section style={{ background: "#ffffff", padding: "60px 0", borderTop: "1px solid var(--border-subtle)", borderBottom: "1px solid var(--border-subtle)" }}>
         <div className="container">
-          <div style={{ textAlign: "center", maxWidth: "650px", margin: "0 auto 50px" }}>
-            <span className="badge badge-gold" style={{ marginBottom: "8px" }}>
-              Ventajas Shama
-            </span>
-            <h2 style={{ fontSize: "2.2rem", fontWeight: 800, marginBottom: "14px" }}>
-              ¿Por qué nuestra Tiquetera es Superior?
+          <div style={{ textAlign: "center", maxWidth: "600px", margin: "0 auto 40px" }}>
+            <h2 style={{ fontSize: "1.7rem", fontWeight: 800, color: "var(--text-primary)", marginBottom: "8px" }}>
+              ¿Por qué elegir Shama Tiquetera?
             </h2>
-            <p style={{ color: "var(--text-secondary)" }}>
-              Diseñada específicamente para resolver los problemas de compra, reventa y verificación en Venezuela.
+            <p style={{ fontSize: "0.95rem", color: "var(--text-secondary)" }}>
+              Tu boleto digital seguro en minutos, sin filas ni boletos físicos que perder.
             </p>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "24px" }}>
-            {/* Feature 1 */}
-            <div className="card" style={{ padding: "28px" }}>
-              <div style={{ width: "50px", height: "50px", borderRadius: "12px", background: "rgba(245, 158, 11, 0.15)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--accent-gold)", marginBottom: "20px" }}>
-                <Zap size={26} />
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: "24px" }}>
+            <div style={{ padding: "24px", borderRadius: "12px", background: "var(--bg-primary)", border: "1px solid var(--border-subtle)" }}>
+              <div style={{ width: "42px", height: "42px", borderRadius: "10px", background: "var(--primary-blue-light)", color: "var(--primary-blue)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "16px" }}>
+                <Smartphone size={22} />
               </div>
-              <h3 style={{ fontSize: "1.2rem", marginBottom: "10px" }}>Pago Móvil Directo en Bs.</h3>
-              <p style={{ color: "var(--text-secondary)", fontSize: "0.9rem", lineHeight: "1.6" }}>
-                Paga a través de tus bancos de confianza (Mercantil, Banesco, BDV, Banplus) con cálculo automático en Bolívares según la tasa oficial del día.
+              <h3 style={{ fontSize: "1.1rem", fontWeight: 700, marginBottom: "8px" }}>Pago Móvil Directo en Bs.</h3>
+              <p style={{ fontSize: "0.88rem", color: "var(--text-secondary)", lineHeight: "1.6" }}>
+                Paga a través de Mercantil, Banesco, Banco de Venezuela o Banplus con cálculo automático según la tasa oficial BCV.
               </p>
             </div>
 
-            {/* Feature 2 */}
-            <div className="card" style={{ padding: "28px" }}>
-              <div style={{ width: "50px", height: "50px", borderRadius: "12px", background: "rgba(16, 185, 129, 0.15)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--status-success)", marginBottom: "20px" }}>
-                <ShieldCheck size={26} />
+            <div style={{ padding: "24px", borderRadius: "12px", background: "var(--bg-primary)", border: "1px solid var(--border-subtle)" }}>
+              <div style={{ width: "42px", height: "42px", borderRadius: "10px", background: "var(--accent-emerald-bg)", color: "var(--accent-emerald)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "16px" }}>
+                <ShieldCheck size={22} />
               </div>
-              <h3 style={{ fontSize: "1.2rem", marginBottom: "10px" }}>QR Criptográfico Anti-Fraude</h3>
-              <p style={{ color: "var(--text-secondary)", fontSize: "0.9rem", lineHeight: "1.6" }}>
-                Cada boleto cuenta con una firma digital única e irrepetible. Nuestro sistema detecta automáticamente intentos de duplicación o reventa ilegal.
+              <h3 style={{ fontSize: "1.1rem", fontWeight: 700, marginBottom: "8px" }}>Código QR Anti-Falsificación</h3>
+              <p style={{ fontSize: "0.88rem", color: "var(--text-secondary)", lineHeight: "1.6" }}>
+                Cada entrada tiene firma criptográfica digital HMAC-SHA256, imposibilitando la reventa ilegal o duplicados.
               </p>
             </div>
 
-            {/* Feature 3 */}
-            <div className="card" style={{ padding: "28px" }}>
-              <div style={{ width: "50px", height: "50px", borderRadius: "12px", background: "rgba(6, 182, 212, 0.15)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--accent-cyan)", marginBottom: "20px" }}>
-                <Video size={26} />
+            <div style={{ padding: "24px", borderRadius: "12px", background: "var(--bg-primary)", border: "1px solid var(--border-subtle)" }}>
+              <div style={{ width: "42px", height: "42px", borderRadius: "10px", background: "var(--accent-gold-bg)", color: "var(--accent-gold)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "16px" }}>
+                <Zap size={22} />
               </div>
-              <h3 style={{ fontSize: "1.2rem", marginBottom: "10px" }}>Salas de Streaming Protegidas</h3>
-              <p style={{ color: "var(--text-secondary)", fontSize: "0.9rem", lineHeight: "1.6" }}>
-                Para conferencias virtuales, cada comprador recibe un <em>Magic Link</em> personal con bloqueo de sesiones simultáneas y chat en vivo con los ponentes.
+              <h3 style={{ fontSize: "1.1rem", fontWeight: 700, marginBottom: "8px" }}>Acreditación Express</h3>
+              <p style={{ fontSize: "0.88rem", color: "var(--text-secondary)", lineHeight: "1.6" }}>
+                Solo muestra tu celular en la puerta del teatro o salón. Validación en menos de 2 segundos para evitar colas.
               </p>
             </div>
 
-            {/* Feature 4 */}
-            <div className="card" style={{ padding: "28px" }}>
-              <div style={{ width: "50px", height: "50px", borderRadius: "12px", background: "rgba(139, 92, 246, 0.15)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--accent-purple)", marginBottom: "20px" }}>
-                <Globe size={26} />
+            <div style={{ padding: "24px", borderRadius: "12px", background: "var(--bg-primary)", border: "1px solid var(--border-subtle)" }}>
+              <div style={{ width: "42px", height: "42px", borderRadius: "10px", background: "var(--accent-magenta-bg)", color: "var(--accent-magenta)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "16px" }}>
+                <Video size={22} />
               </div>
-              <h3 style={{ fontSize: "1.2rem", marginBottom: "10px" }}>Billetera Cripto (Binance Pay)</h3>
-              <p style={{ color: "var(--text-secondary)", fontSize: "0.9rem", lineHeight: "1.6" }}>
-                Paga en USDT con un escaneo desde Binance Pay o vía redes Tron/BNB sin comisiones internacionales de tarjeta de crédito.
+              <h3 style={{ fontSize: "1.1rem", fontWeight: 700, marginBottom: "8px" }}>Streaming HD Individual</h3>
+              <p style={{ fontSize: "0.88rem", color: "var(--text-secondary)", lineHeight: "1.6" }}>
+                Para seminarios online, tu boleto incluye un <em>Magic Link</em> individual con sala virtual HD y chat interactivo.
               </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ================= ECOMMERCE ON-DEMAND TEASER (PHASE 2) ================= */}
-      <section style={{ padding: "80px 0" }}>
-        <div className="container">
-          <div
-            className="glass-panel"
-            style={{
-              padding: "48px 40px",
-              background: "linear-gradient(135deg, rgba(27, 35, 57, 0.8) 0%, rgba(15, 20, 34, 0.95) 100%)",
-              border: "1px solid var(--border-gold)",
-              borderRadius: "var(--radius-lg)",
-              position: "relative",
-              overflow: "hidden",
-            }}
-          >
-            <div style={{ maxWidth: "700px" }}>
-              <span className="badge badge-gold" style={{ marginBottom: "16px" }}>
-                <PackageOpen size={14} /> Próximamente • Fase 2
-              </span>
-              <h2 style={{ fontSize: "2.3rem", fontWeight: 800, marginBottom: "14px", lineHeight: "1.2" }}>
-                Importación Audiovisual On-Demand por Enlace
-              </h2>
-              <p style={{ color: "var(--text-secondary)", fontSize: "1.05rem", lineHeight: "1.6", marginBottom: "24px" }}>
-                ¿Necesitas cámaras, lentes, luces, micrófonos o cualquier producto de <strong>B&H Photo, Amazon, eBay, Temu, Shein o AliExpress</strong>?
-                Solo pegarás el enlace y nuestra calculadora te mostrará el costo exacto puesto en tu puerta en Venezuela, todo pagado en Bolívares.
-              </p>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "16px", color: "var(--text-muted)", fontSize: "0.88rem" }}>
-                <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                  <CheckCircle2 size={16} color="var(--accent-gold)" /> Sin necesidad de tarjeta en dólares
-                </span>
-                <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                  <CheckCircle2 size={16} color="var(--accent-gold)" /> Flete aéreo y marítimo consolidado
-                </span>
-                <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                  <CheckCircle2 size={16} color="var(--accent-gold)" /> Gestión aduanal incluida
-                </span>
-              </div>
             </div>
           </div>
         </div>

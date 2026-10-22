@@ -2,104 +2,104 @@
 
 import React from "react";
 import Link from "next/link";
-import { Clapperboard, ShieldCheck, QrCode, Phone, Mail, MapPin } from "lucide-react";
+import { Ticket, ShieldCheck, Phone, Mail, MapPin } from "lucide-react";
 
 export default function Footer() {
   return (
-    <footer className="footer">
+    <footer className="clean-footer">
       <div className="container">
-        <div className="footer-grid">
-          {/* Brand info */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "36px", marginBottom: "40px" }}>
+          {/* Brand */}
           <div>
-            <div className="logo-wrap" style={{ marginBottom: "16px" }}>
-              <div className="logo-badge">
-                <Clapperboard size={20} />
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "14px", color: "#ffffff", fontWeight: 800, fontSize: "1.2rem" }}>
+              <div style={{ width: "30px", height: "30px", background: "var(--primary-blue)", borderRadius: "6px", display: "flex", alignItems: "center", justifyContent: "center", color: "#ffffff" }}>
+                <Ticket size={18} />
               </div>
-              <div>
-                <span style={{ color: "#ffffff", fontWeight: 800 }}>SHAMA</span>
-                <span style={{ color: "var(--accent-gold)", fontWeight: 400, marginLeft: "4px" }}>PRODUCCIONES</span>
-              </div>
+              <span>SHAMA TIQUETERA</span>
             </div>
-            <p style={{ color: "var(--text-secondary)", fontSize: "0.9rem", lineHeight: "1.6", maxWidth: "340px", marginBottom: "20px" }}>
-              Productora audiovisual y de eventos de alta envergadura. Conferencias, talleres y seminarios con tiquetera 100% digital y pagos en Venezuela.
+            <p style={{ fontSize: "0.88rem", lineHeight: "1.6", color: "#94a3b8", marginBottom: "16px" }}>
+              Tiquetera oficial y boletería digital para conferencias, masterclasses, conciertos y seminarios en Venezuela. Boletos 100% digitales con QR criptográfico.
             </p>
-            <div style={{ display: "flex", flexDirection: "column", gap: "8px", fontSize: "0.85rem", color: "var(--text-muted)" }}>
-              <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                <MapPin size={16} color="var(--accent-gold)" /> Caracas & Valencia, Venezuela
+            <div style={{ display: "flex", flexDirection: "column", gap: "6px", fontSize: "0.82rem", color: "#cbd5e1" }}>
+              <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                <MapPin size={14} color="var(--primary-blue)" /> Caracas y Valencia, Venezuela
               </span>
-              <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                <Mail size={16} color="var(--accent-gold)" /> contacto@shamaproducciones.com
+              <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                <Phone size={14} color="var(--primary-blue)" /> +58 (412) 123-4567
               </span>
-              <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                <Phone size={16} color="var(--accent-gold)" /> +58 (412) 123-4567
+              <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                <Mail size={14} color="var(--primary-blue)" /> boleteria@shamaproducciones.com
               </span>
             </div>
           </div>
 
-          {/* Platform Links */}
+          {/* Categorías */}
           <div>
-            <h4 className="footer-title">Plataforma</h4>
-            <ul className="footer-links">
+            <h4 style={{ color: "#ffffff", fontSize: "0.95rem", fontWeight: 700, marginBottom: "14px" }}>
+              Categorías de Eventos
+            </h4>
+            <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: "10px", fontSize: "0.88rem" }}>
               <li>
-                <Link href="/eventos">Todos los Eventos</Link>
+                <Link href="/eventos?cat=conferencia">Conferencias de Cine & Producción</Link>
               </li>
               <li>
-                <Link href="/validador">Validador de Boletos (Staff)</Link>
+                <Link href="/eventos?cat=masterclass">Masterclasses Técnicas</Link>
               </li>
               <li>
-                <Link href="/admin">Panel de Administración</Link>
+                <Link href="/eventos?cat=taller">Talleres y Workshops Prácticos</Link>
               </li>
               <li>
-                <span style={{ color: "var(--text-muted)", fontSize: "0.85rem" }}>
-                  Importador E-commerce <em style={{ color: "var(--accent-gold)" }}>(Fase 2)</em>
-                </span>
+                <Link href="/eventos?cat=seminario">Seminarios en Streaming Online</Link>
               </li>
             </ul>
           </div>
 
-          {/* Event Categories */}
+          {/* Canales de Pago en Venezuela */}
           <div>
-            <h4 className="footer-title">Categorías</h4>
-            <ul className="footer-links">
-              <li>
-                <Link href="/eventos?cat=conferencia">Conferencias de Cine</Link>
-              </li>
-              <li>
-                <Link href="/eventos?cat=masterclass">Masterclasses en Vivo</Link>
-              </li>
-              <li>
-                <Link href="/eventos?cat=seminario">Seminarios Online HD</Link>
-              </li>
-              <li>
-                <Link href="/eventos?cat=taller">Workshops Intensivos</Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Payment Methods Venezuela */}
-          <div>
-            <h4 className="footer-title">Métodos de Pago</h4>
-            <p style={{ color: "var(--text-secondary)", fontSize: "0.85rem", marginBottom: "14px" }}>
-              Pagos en Bolívares y Cripto sin comisiones intermedias:
+            <h4 style={{ color: "#ffffff", fontSize: "0.95rem", fontWeight: 700, marginBottom: "14px" }}>
+              Métodos de Pago Aceptados
+            </h4>
+            <p style={{ fontSize: "0.85rem", color: "#94a3b8", marginBottom: "12px" }}>
+              Pagos en Bolívares a tasa oficial BCV y Criptomonedas:
             </p>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
               <span className="badge badge-gold">Pago Móvil</span>
+              <span className="badge badge-gold">Banco Mercantil</span>
               <span className="badge badge-gold">Banesco</span>
-              <span className="badge badge-gold">Mercantil</span>
               <span className="badge badge-gold">BDV</span>
               <span className="badge badge-gold">Banplus</span>
               <span className="badge badge-online">Binance Pay</span>
               <span className="badge badge-online">USDT</span>
             </div>
           </div>
+
+          {/* Información y Soporte */}
+          <div>
+            <h4 style={{ color: "#ffffff", fontSize: "0.95rem", fontWeight: 700, marginBottom: "14px" }}>
+              Atención al Cliente
+            </h4>
+            <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: "10px", fontSize: "0.88rem" }}>
+              <li>
+                <Link href="/mis-boletos">Consultar Mis Boletos</Link>
+              </li>
+              <li>
+                <Link href="/login">Acceso de Compradores</Link>
+              </li>
+              <li>
+                <a href="https://wa.me/584121234567" target="_blank" rel="noopener noreferrer">
+                  Soporte WhatsApp Directo
+                </a>
+              </li>
+            </ul>
+          </div>
         </div>
 
-        {/* Bottom copyright */}
-        <div className="footer-bottom">
-          <p>© 2026 Shama Producciones. Todos los derechos reservados.</p>
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <ShieldCheck size={16} color="var(--status-success)" />
-            <span>Tiquetera Digital con Cifrado Criptográfico Anti-Fraude</span>
+        {/* Bottom */}
+        <div style={{ borderTop: "1px solid rgba(255, 255, 255, 0.08)", paddingTop: "20px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "10px", fontSize: "0.8rem", color: "#64748b" }}>
+          <div>© 2026 Shama Producciones. Todos los derechos reservados.</div>
+          <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "#94a3b8" }}>
+            <ShieldCheck size={16} color="#16a34a" />
+            <span>Plataforma de Boletos Segura con Cifrado QR Anti-Fraude</span>
           </div>
         </div>
       </div>

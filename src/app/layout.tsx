@@ -4,6 +4,7 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { CurrencyProvider } from "@/components/CurrencyContext";
+import { AuthProvider } from "@/components/AuthContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -46,13 +47,15 @@ export default function RootLayout({
   return (
     <html lang="es" className={`${geistSans.variable} ${geistMono.variable}`}>
       <body>
-        <CurrencyProvider>
-          <Suspense fallback={<header className="navbar" style={{ height: "76px" }} />}>
-            <Navbar />
-          </Suspense>
-          <main style={{ flex: 1 }}>{children}</main>
-          <Footer />
-        </CurrencyProvider>
+        <AuthProvider>
+          <CurrencyProvider>
+            <Suspense fallback={<header className="main-navbar" style={{ height: "68px" }} />}>
+              <Navbar />
+            </Suspense>
+            <main style={{ flex: 1 }}>{children}</main>
+            <Footer />
+          </CurrencyProvider>
+        </AuthProvider>
       </body>
     </html>
   );
