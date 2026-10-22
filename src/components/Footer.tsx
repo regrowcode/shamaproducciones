@@ -63,15 +63,13 @@ export default function Footer() {
                 <Link href="/contacto" style={{ color: "#94a3b8" }}>Sobre nosotros</Link>
               </li>
               <li>
-                <a
-                  href="https://business.latiquetera.com/"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <Link
+                  href="/venda-su-evento"
                   style={{ color: "#fef08a", fontWeight: 700 }}
                   title="Venda su evento con nosotros"
                 >
                   ★ Venda su evento
-                </a>
+                </Link>
               </li>
               <li>
                 <Link href="/contacto" style={{ color: "#94a3b8" }}>PQRS / Soporte al cliente</Link>
