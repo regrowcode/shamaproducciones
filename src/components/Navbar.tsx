@@ -1,136 +1,106 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 import {
   Ticket,
+  Search,
+  MapPin,
+  Calendar,
+  LayoutGrid,
   User as UserIcon,
   LogOut,
-  Calendar,
-  MessageCircle,
+  Menu,
+  X,
 } from "lucide-react";
-import { useCurrency } from "./CurrencyContext";
 import { useAuth } from "./AuthContext";
 
 export default function Navbar() {
-  const pathname = usePathname();
-  const { currency, setCurrency, rate } = useCurrency();
+  const router = useRouter();
   const { user, logout } = useAuth();
 
-  const isActive = (path: string) => {
-    if (path === "/" && pathname === "/") return true;
-    if (path !== "/" && pathname?.startsWith(path)) return true;
-    return false;
+  // Search filter states
+  const [query, setQuery] = useState("");
+  const [ciudad, setCiudad] = useState("");
+  const [fecha, setFecha] = useState("");
+  const [categoria, setCategoria] = useState("");
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    const params = new URLSearchParams();
+    if (query.trim()) params.set("q", query.trim());
+    if (ciudad) params.set("ciudad", ciudad);
+    if (fecha) params.set("fecha", fecha);
+    if (categoria) params.set("cat", categoria);
+
+    const queryString = params.toString();
+    router.push(`/eventos${queryString ? `?${queryString}` : ""}`);
   };
 
   return (
-    <>
-      {/* Top Utility Bar (La Tiquetera style) */}
-      <div className="top-utility-bar">
-        <div className="container top-bar-inner">
-          <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
-            <span style={{ display: "inline-flex", alignItems: "center", gap: "5px" }}>
-              🇻🇪 <strong>Venezuela</strong>
-            </span>
-            <span style={{ color: "#64748b" }}>|</span>
-            <span>
-              Tasa Oficial BCV: <strong style={{ color: "#f8fafc" }}>{rate} Bs/USD</strong>
-            </span>
-          </div>
-
-          <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-            <a
-              href="https://wa.me/584121234567"
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ display: "inline-flex", alignItems: "center", gap: "5px", color: "#e2e8f0" }}
+    <header className="full-header" id="main-header">
+      <div className="full-header-container">
+        {/* ================= TOP ROW: BRAND & NAVIGATION ================= */}
+        <div className="full-header-top">
+          {/* Logo brand */}
+          <Link href="/" className="brand-logo-wrap" id="header-brand-logo" style={{ textDecoration: "none" }}>
+            <div
+              style={{
+                width: "36px",
+                height: "36px",
+                borderRadius: "8px",
+                background: "#ffffff",
+                color: "#0047cc",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
+              }}
             >
-              <MessageCircle size={13} color="#22c55e" /> Soporte WhatsApp
-            </a>
-
-            {/* Currency Pill */}
-            <div style={{ display: "inline-flex", background: "rgba(255,255,255,0.12)", borderRadius: "4px", padding: "2px" }}>
-              <button
-                type="button"
-                onClick={() => setCurrency("USD")}
-                style={{
-                  padding: "2px 8px",
-                  fontSize: "0.72rem",
-                  fontWeight: 700,
-                  borderRadius: "3px",
-                  background: currency === "USD" ? "#ffffff" : "transparent",
-                  color: currency === "USD" ? "#0f172a" : "#cbd5e1",
-                }}
-                id="btn-curr-usd"
-              >
-                USD $
-              </button>
-              <button
-                type="button"
-                onClick={() => setCurrency("VES")}
-                style={{
-                  padding: "2px 8px",
-                  fontSize: "0.72rem",
-                  fontWeight: 700,
-                  borderRadius: "3px",
-                  background: currency === "VES" ? "#ffffff" : "transparent",
-                  color: currency === "VES" ? "#0f172a" : "#cbd5e1",
-                }}
-                id="btn-curr-ves"
-              >
-                Bs.
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Navbar */}
-      <header className="main-navbar">
-        <div className="container main-navbar-inner">
-          {/* Logo */}
-          <Link href="/" className="brand-logo-wrap" id="site-logo">
-            <div className="brand-icon-box">
               <Ticket size={22} />
             </div>
-            <div>
-              <span style={{ letterSpacing: "-0.03em" }}>SHAMA</span>
-              <span style={{ fontWeight: 400, marginLeft: "4px", fontSize: "1.1rem", opacity: 0.9 }}>
-                TIQUETERA
+            <div style={{ lineHeight: "1.1" }}>
+              <span style={{ fontSize: "1.35rem", fontWeight: 900, letterSpacing: "-0.03em", color: "#ffffff" }}>
+                shama
+              </span>
+              <span style={{ fontSize: "1.1rem", fontWeight: 400, marginLeft: "4px", color: "rgba(255,255,255,0.85)" }}>
+                tiquetera
               </span>
             </div>
           </Link>
 
-          {/* Categories Nav (La Tiquetera style) */}
-          <nav className="nav-category-links">
-            <Link href="/" className={`nav-cat-link ${isActive("/") ? "active" : ""}`}>
-              Inicio
+          {/* Desktop Navigation Links */}
+          <nav className="full-header-nav" style={{ display: "flex", alignItems: "center", gap: "24px" }}>
+            <Link href="/eventos" className="full-header-nav-link" id="nav-eventos">
+              Eventos
             </Link>
-            <Link href="/eventos" className={`nav-cat-link ${isActive("/eventos") ? "active" : ""}`}>
-              Todos los Eventos
-            </Link>
-            <Link href="/eventos?cat=conferencia" className="nav-cat-link">
-              Conferencias
-            </Link>
-            <Link href="/eventos?cat=masterclass" className="nav-cat-link">
-              Masterclasses
-            </Link>
-            <Link href="/eventos?cat=taller" className="nav-cat-link">
-              Talleres
-            </Link>
-          </nav>
 
-          {/* User Auth Menu */}
-          <div className="nav-auth-actions">
+            <Link href="/contacto#nosotros" className="full-header-nav-link" id="nav-acerca-nosotros">
+              Acerca de nosotros
+            </Link>
+
+            <Link
+              href="/venda-su-evento"
+              className="full-header-nav-link"
+              style={{ color: "#fef08a", fontWeight: 800 }}
+              id="nav-venda-su-evento"
+            >
+              Venda su evento
+            </Link>
+
+            {/* Auth section */}
             {user ? (
-              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                 <Link
                   href="/mis-boletos"
-                  className="btn btn-outline-white btn-sm"
-                  id="nav-my-tickets"
+                  className="full-header-nav-link"
+                  style={{ display: "flex", alignItems: "center", gap: "6px" }}
+                  id="nav-mis-boletos"
                 >
-                  <Ticket size={15} /> Mis Boletos
+                  <Ticket size={16} />
+                  <span>Mis Boletos</span>
                 </Link>
 
                 <div
@@ -138,37 +108,226 @@ export default function Navbar() {
                     display: "flex",
                     alignItems: "center",
                     gap: "8px",
-                    background: "rgba(255,255,255,0.12)",
-                    padding: "5px 12px",
+                    background: "rgba(255,255,255,0.15)",
+                    padding: "4px 12px",
                     borderRadius: "6px",
-                    fontSize: "0.85rem",
+                    fontSize: "0.88rem",
+                    fontWeight: 600,
                   }}
                 >
                   <UserIcon size={14} />
-                  <span style={{ fontWeight: 600 }}>{user.fullName.split(" ")[0]}</span>
+                  <span>{user.fullName.split(" ")[0]}</span>
                   <button
                     type="button"
                     onClick={logout}
                     title="Cerrar sesión"
-                    style={{ marginLeft: "4px", color: "rgba(255,255,255,0.7)" }}
+                    style={{ color: "rgba(255,255,255,0.75)", cursor: "pointer", marginLeft: "4px" }}
                   >
                     <LogOut size={14} />
                   </button>
                 </div>
               </div>
             ) : (
-              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                <Link href="/login" className="btn btn-outline-white btn-sm" id="nav-login">
-                  Iniciar Sesión
+              <div style={{ display: "flex", alignItems: "center", gap: "18px" }}>
+                <Link href="/login" className="full-header-nav-link" id="nav-iniciar-sesion">
+                  Iniciar sesión
                 </Link>
-                <Link href="/registro" className="btn btn-primary btn-sm" style={{ background: "#ffffff", color: "var(--primary-blue)" }} id="nav-register">
-                  Registrarse
+                <Link
+                  href="/registro"
+                  className="full-header-nav-link"
+                  style={{
+                    background: "rgba(255,255,255,0.15)",
+                    padding: "6px 14px",
+                    borderRadius: "6px",
+                    border: "1px solid rgba(255,255,255,0.3)",
+                  }}
+                  id="nav-registrar"
+                >
+                  Registrar
                 </Link>
               </div>
             )}
-          </div>
+
+            {/* Language Selector Indicator */}
+            <span
+              style={{
+                fontSize: "0.85rem",
+                fontWeight: 700,
+                color: "#ffffff",
+                padding: "3px 8px",
+                border: "1px solid rgba(255,255,255,0.4)",
+                borderRadius: "4px",
+                userSelect: "none",
+              }}
+            >
+              ES
+            </span>
+
+            {/* Mobile menu hamburger toggle */}
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              style={{ color: "#ffffff", cursor: "pointer", display: "flex", alignItems: "center" }}
+              aria-label="Abrir menú"
+            >
+              {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+          </nav>
         </div>
-      </header>
-    </>
+
+        {/* ================= BOTTOM ROW: MULTI-SEGMENT SEARCH BAR (MATCHING PHOTO) ================= */}
+        <form onSubmit={handleSearch} className="search-segmented-bar" id="header-search-bar">
+          {/* Segmento 1: Texto de búsqueda */}
+          <div className="search-segment search-segment-main">
+            <Search size={17} style={{ color: "#64748b", flexShrink: 0 }} />
+            <input
+              type="text"
+              placeholder="Buscar por evento, artista o lugar"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              id="search-input-query"
+            />
+          </div>
+
+          {/* Segmento 2: Ciudad */}
+          <div className="search-segment search-segment-select">
+            <MapPin size={16} style={{ color: "#64748b", flexShrink: 0 }} />
+            <select
+              value={ciudad}
+              onChange={(e) => setCiudad(e.target.value)}
+              id="search-select-city"
+            >
+              <option value="">Cualquier ciudad</option>
+              <option value="Barquisimeto">Barquisimeto (Lara)</option>
+              <option value="Caracas">Caracas</option>
+              <option value="Valencia">Valencia</option>
+              <option value="Maracaibo">Maracaibo</option>
+              <option value="Online">Online / Streaming</option>
+            </select>
+          </div>
+
+          {/* Segmento 3: Fecha */}
+          <div className="search-segment search-segment-select">
+            <Calendar size={16} style={{ color: "#64748b", flexShrink: 0 }} />
+            <select
+              value={fecha}
+              onChange={(e) => setFecha(e.target.value)}
+              id="search-select-date"
+            >
+              <option value="">Cualquier fecha</option>
+              <option value="fin-de-semana">Este fin de semana</option>
+              <option value="este-mes">Este mes</option>
+              <option value="proximamente">Próximos eventos 2026</option>
+            </select>
+          </div>
+
+          {/* Segmento 4: Categoría */}
+          <div className="search-segment search-segment-select">
+            <LayoutGrid size={16} style={{ color: "#64748b", flexShrink: 0 }} />
+            <select
+              value={categoria}
+              onChange={(e) => setCategoria(e.target.value)}
+              id="search-select-category"
+            >
+              <option value="">Cualquier categoría</option>
+              <option value="conferencia">Conferencias</option>
+              <option value="concierto">Conciertos</option>
+              <option value="taller">Talleres</option>
+              <option value="seminario">Seminarios</option>
+              <option value="festival">Festivales</option>
+            </select>
+          </div>
+
+          {/* Segmento 5: Botón Buscar */}
+          <button type="submit" className="search-btn-primary" id="btn-search-submit">
+            Buscar
+          </button>
+        </form>
+
+        {/* Mobile dropdown menu */}
+        {mobileMenuOpen && (
+          <div
+            style={{
+              background: "#0036a3",
+              borderRadius: "8px",
+              marginTop: "12px",
+              padding: "16px",
+              display: "flex",
+              flexDirection: "column",
+              gap: "12px",
+            }}
+          >
+            <Link
+              href="/eventos"
+              onClick={() => setMobileMenuOpen(false)}
+              style={{ color: "#ffffff", fontWeight: 700 }}
+            >
+              Eventos
+            </Link>
+            <Link
+              href="/contacto#nosotros"
+              onClick={() => setMobileMenuOpen(false)}
+              style={{ color: "#ffffff", fontWeight: 700 }}
+            >
+              Acerca de nosotros
+            </Link>
+            <Link
+              href="/venda-su-evento"
+              onClick={() => setMobileMenuOpen(false)}
+              style={{ color: "#fef08a", fontWeight: 800 }}
+            >
+              Venda su evento
+            </Link>
+            <Link
+              href="/contacto"
+              onClick={() => setMobileMenuOpen(false)}
+              style={{ color: "#ffffff", fontWeight: 700 }}
+            >
+              Contáctenos
+            </Link>
+            <div style={{ borderTop: "1px solid rgba(255,255,255,0.2)", paddingTop: "10px" }}>
+              {user ? (
+                <>
+                  <Link
+                    href="/mis-boletos"
+                    onClick={() => setMobileMenuOpen(false)}
+                    style={{ color: "#ffffff", display: "block", marginBottom: "8px" }}
+                  >
+                    Mis Boletos
+                  </Link>
+                  <button
+                    onClick={() => {
+                      logout();
+                      setMobileMenuOpen(false);
+                    }}
+                    style={{ color: "#fca5a5", fontWeight: 600 }}
+                  >
+                    Cerrar Sesión ({user.fullName})
+                  </button>
+                </>
+              ) : (
+                <div style={{ display: "flex", gap: "10px" }}>
+                  <Link
+                    href="/login"
+                    onClick={() => setMobileMenuOpen(false)}
+                    style={{ color: "#ffffff", fontWeight: 700 }}
+                  >
+                    Iniciar sesión
+                  </Link>
+                  <span style={{ color: "rgba(255,255,255,0.4)" }}>|</span>
+                  <Link
+                    href="/registro"
+                    onClick={() => setMobileMenuOpen(false)}
+                    style={{ color: "#fef08a", fontWeight: 700 }}
+                  >
+                    Registrar
+                  </Link>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    </header>
   );
 }

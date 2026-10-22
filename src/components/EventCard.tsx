@@ -3,75 +3,95 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Calendar, MapPin, Video, ArrowRight } from "lucide-react";
 import { ShamaEvent } from "@/lib/types";
-import { useCurrency } from "./CurrencyContext";
 
 interface EventCardProps {
   event: ShamaEvent;
 }
 
 export default function EventCard({ event }: EventCardProps) {
-  const { formatPrice } = useCurrency();
-
-  const minPrice = Math.min(...event.tiers.map((t) => t.priceUsd));
-  const priceDisplay = formatPrice(minPrice);
-
   return (
-    <article className="clean-event-card" id={`event-card-${event.slug}`}>
-      {/* Banner */}
-      <div className="clean-card-banner">
+    <Link
+      href={`/eventos/${event.slug}`}
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        textDecoration: "none",
+        color: "inherit",
+        transition: "transform 0.2s ease, box-shadow 0.2s ease",
+      }}
+      className="latiquetera-card"
+      id={`event-card-${event.slug}`}
+    >
+      {/* Event Poster Image */}
+      <div
+        style={{
+          position: "relative",
+          width: "100%",
+          aspectRatio: "1 / 1",
+          borderRadius: "8px",
+          overflow: "hidden",
+          backgroundColor: "#e2e8f0",
+          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
+        }}
+      >
         <Image
           src={event.bannerUrl}
           alt={event.title}
           fill
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          className="clean-card-img"
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw, 25vw"
+          style={{ objectFit: "cover", transition: "transform 0.3s ease" }}
         />
 
-        {/* Date chip */}
-        <div className="clean-card-date-badge">
-          <Calendar size={14} color="var(--primary-blue)" />
-          <span>{event.date}</span>
-        </div>
-
-        {/* Format badge overlay */}
-        <div style={{ position: "absolute", bottom: "10px", right: "10px" }}>
-          {event.format === "presencial" && <span className="badge badge-presencial">Presencial</span>}
-          {event.format === "online" && <span className="badge badge-online">Online HD</span>}
-          {event.format === "hibrido" && <span className="badge badge-hibrido">Híbrido</span>}
-        </div>
-      </div>
-
-      {/* Body */}
-      <div className="clean-card-body">
-        <h3 className="clean-card-title">{event.title}</h3>
-
-        <div className="clean-card-meta">
-          <span style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-            <MapPin size={14} color="#64748b" /> {event.location.split("(")[0].trim()}, {event.city.split(",")[0].trim()}
-          </span>
-        </div>
-
-        <p style={{ fontSize: "0.85rem", color: "var(--text-secondary)", marginBottom: "16px", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
-          {event.subtitle}
-        </p>
-
-        {/* Card Footer */}
-        <div className="clean-card-footer">
-          <div>
-            <span style={{ fontSize: "0.7rem", color: "var(--text-muted)", textTransform: "uppercase", display: "block" }}>
-              Desde
-            </span>
-            <div className="clean-card-price-main">{priceDisplay.main}</div>
-            <div className="clean-card-price-sub">{priceDisplay.secondary}</div>
+        {event.format === "online" && (
+          <div
+            style={{
+              position: "absolute",
+              bottom: "8px",
+              right: "8px",
+              background: "#2563eb",
+              color: "#ffffff",
+              fontSize: "0.7rem",
+              fontWeight: 700,
+              padding: "3px 8px",
+              borderRadius: "4px",
+              textTransform: "uppercase",
+            }}
+          >
+            Online HD
           </div>
+        )}
+      </div>
 
-          <Link href={`/eventos/${event.slug}`} className="btn btn-primary btn-sm" id={`btn-buy-${event.slug}`}>
-            Comprar <ArrowRight size={14} />
-          </Link>
+      {/* Info below photo (Matching Photo 1) */}
+      <div style={{ paddingTop: "12px", display: "flex", flexDirection: "column", gap: "3px" }}>
+        {/* Title */}
+        <h3
+          style={{
+            fontSize: "0.95rem",
+            fontWeight: 800,
+            color: "#0f172a",
+            lineHeight: "1.3",
+            margin: 0,
+            display: "-webkit-box",
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: "vertical",
+            overflow: "hidden",
+          }}
+        >
+          {event.title}
+        </h3>
+
+        {/* Date */}
+        <div style={{ fontSize: "0.8rem", color: "#64748b" }}>
+          {event.date}
+        </div>
+
+        {/* City / Venue in blue link style */}
+        <div style={{ fontSize: "0.8rem", color: "#2563eb", fontWeight: 600 }}>
+          {event.city} • {event.location.split("(")[0].trim()}
         </div>
       </div>
-    </article>
+    </Link>
   );
 }

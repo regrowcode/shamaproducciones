@@ -10,8 +10,8 @@ import EventCard from "@/components/EventCard";
 function EventosContent() {
   const searchParams = useSearchParams();
   const q = searchParams.get("q") || "";
-  const city = searchParams.get("city") || "";
-  const cat = searchParams.get("cat") || "";
+  const city = searchParams.get("ciudad") || searchParams.get("city") || "";
+  const cat = searchParams.get("cat") || searchParams.get("categoria") || "";
 
   const filteredEvents = useMemo(() => {
     return filterEvents({
